@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Foundatio.Redis" Version="10.6.0" />
+    <PackageReference Include="MessagePack" Version="2.4.59" />
+    <PackageReference Include="Neolution.CodeAnalysis" Version="2.6.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Neolution.Extensions.Caching.Abstractions\Neolution.Extensions.Caching.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
