@@ -41,7 +41,11 @@ jobs:
         run: |
           dotnet restore
           dotnet build --configuration '${{ env.BUILD_CONFIGURATION }}' -p:Version=$GITVERSION_NUGETVERSION
-          dotnet pack '**/Neolution.Extensions.Caching.Abstractions.csproj;**/Neolution.Extensions.Caching.RedisHybrid.csproj;**/Neolution.Extensions.Caching.InMemory.csproj;**/Neolution.Extensions.Caching.Distributed.csproj' --configuration '${{ env.BUILD_CONFIGURATION }}' --no-build -p:PackageVersion=$GITVERSION_NUGETVERSION
+          dotnet pack Neolution.Extensions.Caching.Abstractions/Neolution.Extensions.Caching.Abstractions.csproj --configuration '${{ env.BUILD_CONFIGURATION }}' --no-build -p:PackageVersion=$GITVERSION_NUGETVERSION
+          dotnet pack Neolution.Extensions.Caching.InMemory/Neolution.Extensions.Caching.InMemory.csproj --configuration '${{ env.BUILD_CONFIGURATION }}' --no-build -p:PackageVersion=$GITVERSION_NUGETVERSION
+          dotnet pack Neolution.Extensions.Caching.RedisHybrid/Neolution.Extensions.Caching.RedisHybrid.csproj --configuration '${{ env.BUILD_CONFIGURATION }}' --no-build -p:PackageVersion=$GITVERSION_NUGETVERSION
+          dotnet pack Neolution.Extensions.Caching.Distributed/Neolution.Extensions.Caching.Distributed.csproj --configuration '${{ env.BUILD_CONFIGURATION }}' --no-build -p:PackageVersion=$GITVERSION_NUGETVERSION
+
 
       #- name: Push NuGet package
       # run: dotnet nuget push --skip-duplicate -k $NUGET_AUTH_TOKEN  **/bin/Release/*.nupkg
