@@ -22,9 +22,10 @@
         private readonly IDistributedCache cache;
 
         /// <summary>
-        /// The serializer options. Uses compression by default.
+        /// The serializer options. Uses contract-less serialization and compression by default.
         /// </summary>
-        private readonly MessagePackSerializerOptions serializerOptions = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+        private readonly MessagePackSerializerOptions serializerOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options
+            .WithCompression(MessagePackCompression.Lz4BlockArray);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessagePackDistributedCache{TCacheId}"/> class.
@@ -41,6 +42,11 @@
             }
 
             var options = optionsAccessor.Value;
+            if (options.RequireMessagePackObjectAnnotation)
+            {
+                this.serializerOptions = MessagePackSerializerOptions.Standard;
+            }
+
             if (options.DisableCompression)
             {
                 this.serializerOptions = this.serializerOptions.WithCompression(MessagePackCompression.None);

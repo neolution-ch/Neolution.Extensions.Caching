@@ -12,6 +12,15 @@
         /// </summary>
         public bool DisableCompression { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to require <see cref="MessagePack.MessagePackObjectAttribute"/> annotation for serializable types.
+        /// Doing so would result in better overall serialization performance and smaller files.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> to require <see cref="MessagePack.MessagePackObjectAttribute"/> annotation; otherwise, <c>false</c>.
+        /// </value>
+        public bool RequireMessagePackObjectAnnotation { get; set; }
+
         /// <inheritdoc />
         public MessagePackDistributedCacheOptions Value => this;
     }
