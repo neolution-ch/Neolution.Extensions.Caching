@@ -35,7 +35,12 @@
         /// <param name="output">The output.</param>
         public void Serialize(object value, Stream output)
         {
-            MessagePackSerializer.Serialize(output, value, this.options);
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            MessagePackSerializer.Serialize(value.GetType(), output, value, this.options);
         }
     }
 }
