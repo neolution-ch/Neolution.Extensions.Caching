@@ -20,14 +20,15 @@
         private static string CacheIdName => typeof(TCacheId).Name;
 
         /// <inheritdoc />
-        public T Get<T>(TCacheId id)
+        public T? Get<T>(TCacheId id)
             where T : class
         {
-            return this.Get<T>(id, null);
+            var cacheKey = CreateCacheKey(id);
+            return this.GetCacheObject<T>(cacheKey);
         }
 
         /// <inheritdoc />
-        public T Get<T>(TCacheId id, string key)
+        public T? Get<T>(TCacheId id, string key)
             where T : class
         {
             var cacheKey = CreateCacheKey(id, key);
@@ -35,14 +36,15 @@
         }
 
         /// <inheritdoc />
-        public Task<T> GetAsync<T>(TCacheId id, CancellationToken token = default)
+        public Task<T?> GetAsync<T>(TCacheId id, CancellationToken token = default)
             where T : class
         {
-            return this.GetAsync<T>(id, null, token);
+            var cacheKey = CreateCacheKey(id);
+            return this.GetCacheObjectAsync<T>(cacheKey, token);
         }
 
         /// <inheritdoc />
-        public Task<T> GetAsync<T>(TCacheId id, string key, CancellationToken token = default)
+        public Task<T?> GetAsync<T>(TCacheId id, string key, CancellationToken token = default)
             where T : class
         {
             var cacheKey = CreateCacheKey(id, key);
@@ -53,7 +55,8 @@
         public void Set<T>(TCacheId id, T value)
             where T : class
         {
-            this.Set(id, null, value);
+            var cacheKey = CreateCacheKey(id);
+            this.SetCacheObject(cacheKey, value, new CacheEntryOptions());
         }
 
         /// <inheritdoc />
@@ -61,14 +64,15 @@
             where T : class
         {
             var cacheKey = CreateCacheKey(id, key);
-            this.SetCacheObject(cacheKey, value, null);
+            this.SetCacheObject(cacheKey, value, new CacheEntryOptions());
         }
 
         /// <inheritdoc />
         public Task SetAsync<T>(TCacheId id, T value, CancellationToken token = default)
             where T : class
         {
-            return this.SetAsync(id, null, value, token);
+            var cacheKey = CreateCacheKey(id);
+            return this.SetCacheObjectAsync(cacheKey, value, new CacheEntryOptions(), token);
         }
 
         /// <inheritdoc />
@@ -80,14 +84,15 @@
         }
 
         /// <inheritdoc />
-        public void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions options)
+        public void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions? options)
             where T : class
         {
-            this.SetWithOptions(id, null, value, options);
+            var cacheKey = CreateCacheKey(id);
+            this.SetCacheObject(cacheKey, value, options);
         }
 
         /// <inheritdoc />
-        public void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions options)
+        public void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions? options)
             where T : class
         {
             var cacheKey = CreateCacheKey(id, key);
@@ -95,14 +100,15 @@
         }
 
         /// <inheritdoc />
-        public Task SetWithOptionsAsync<T>(TCacheId id, T value, CacheEntryOptions options, CancellationToken token = default)
+        public Task SetWithOptionsAsync<T>(TCacheId id, T value, CacheEntryOptions? options, CancellationToken token = default)
             where T : class
         {
-            return this.SetWithOptionsAsync(id, null, value, options, token);
+            var cacheKey = CreateCacheKey(id);
+            return this.SetCacheObjectAsync(cacheKey, value, options, token);
         }
 
         /// <inheritdoc />
-        public Task SetWithOptionsAsync<T>(TCacheId id, string key, T value, CacheEntryOptions options, CancellationToken token = default)
+        public Task SetWithOptionsAsync<T>(TCacheId id, string key, T value, CacheEntryOptions? options, CancellationToken token = default)
             where T : class
         {
             var cacheKey = CreateCacheKey(id, key);
@@ -112,7 +118,8 @@
         /// <inheritdoc />
         public void Remove(TCacheId id)
         {
-            this.Remove(id, null);
+            var cacheKey = CreateCacheKey(id);
+            this.RemoveCacheObject(cacheKey);
         }
 
         /// <inheritdoc />
@@ -125,7 +132,8 @@
         /// <inheritdoc />
         public Task RemoveAsync(TCacheId id, CancellationToken token = default)
         {
-            return this.RemoveAsync(id, null, token);
+            var cacheKey = CreateCacheKey(id);
+            return this.RemoveCacheObjectAsync(cacheKey, token);
         }
 
         /// <inheritdoc />
@@ -143,7 +151,7 @@
         /// <returns>
         /// The object from the cache
         /// </returns>
-        protected abstract T GetCacheObject<T>(string key)
+        protected abstract T? GetCacheObject<T>(string key)
             where T : class;
 
         /// <summary>
@@ -153,7 +161,7 @@
         /// <param name="key">The key.</param>
         /// <param name="token">Optional. The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>The object from the cache</returns>
-        protected abstract Task<T> GetCacheObjectAsync<T>(string key, CancellationToken token)
+        protected abstract Task<T?> GetCacheObjectAsync<T>(string key, CancellationToken token)
             where T : class;
 
         /// <summary>
@@ -163,7 +171,7 @@
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="options">The options.</param>
-        protected abstract void SetCacheObject<T>(string key, T value, CacheEntryOptions options)
+        protected abstract void SetCacheObject<T>(string key, T value, CacheEntryOptions? options)
             where T : class;
 
         /// <summary>
@@ -175,7 +183,7 @@
         /// <param name="options">The options.</param>
         /// <param name="token">Optional. The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        protected abstract Task SetCacheObjectAsync<T>(string key, T value, CacheEntryOptions options, CancellationToken token)
+        protected abstract Task SetCacheObjectAsync<T>(string key, T value, CacheEntryOptions? options, CancellationToken token)
             where T : class;
 
         /// <summary>
@@ -198,7 +206,7 @@
         /// <param name="id">The cache id.</param>
         /// <param name="key">The key of the cache entry.</param>
         /// <returns>The caching key.</returns>
-        private static string CreateCacheKey(TCacheId id, string key = null)
+        private static string CreateCacheKey(TCacheId id, string? key = null)
         {
             var cacheKey = id.ToString();
             if (!string.IsNullOrWhiteSpace(key))

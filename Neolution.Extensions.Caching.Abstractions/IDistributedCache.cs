@@ -23,7 +23,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <typeparam name="T">The type of the cache identifier.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <returns>The located value or null.</returns>
-        T Get<T>(TCacheId id)
+        T? Get<T>(TCacheId id)
             where T : class;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="key">The key.</param>
         /// <returns>The located value or null.</returns>
-        T Get<T>(TCacheId id, string key)
+        T? Get<T>(TCacheId id, string key)
             where T : class;
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <returns>
         /// The <see cref="Task" /> that represents the asynchronous operation, containing the located value or null.
         /// </returns>
-        Task<T> GetAsync<T>(TCacheId id, CancellationToken token = default)
+        Task<T?> GetAsync<T>(TCacheId id, CancellationToken token = default)
             where T : class;
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <returns>
         /// The <see cref="Task" /> that represents the asynchronous operation, containing the located value or null.
         /// </returns>
-        Task<T> GetAsync<T>(TCacheId id, string key, CancellationToken token = default)
+        Task<T?> GetAsync<T>(TCacheId id, string key, CancellationToken token = default)
             where T : class;
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="value">The value to set in the cache.</param>
         /// <param name="options">The cache options for the value.</param>
-        void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions options)
+        void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions? options)
             where T : class;
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <param name="key">The key.</param>
         /// <param name="value">The value to set in the cache.</param>
         /// <param name="options">The cache options for the value.</param>
-        void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions options)
+        void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions? options)
             where T : class;
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <returns>
         /// The <see cref="Task" /> that represents the asynchronous operation.
         /// </returns>
-        Task SetWithOptionsAsync<T>(TCacheId id, T value, CacheEntryOptions options, CancellationToken token = default)
+        Task SetWithOptionsAsync<T>(TCacheId id, T value, CacheEntryOptions? options, CancellationToken token = default)
             where T : class;
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <returns>
         /// The <see cref="Task" /> that represents the asynchronous operation.
         /// </returns>
-        Task SetWithOptionsAsync<T>(TCacheId id, string key, T value, CacheEntryOptions options, CancellationToken token = default)
+        Task SetWithOptionsAsync<T>(TCacheId id, string key, T value, CacheEntryOptions? options, CancellationToken token = default)
             where T : class;
 
         /// <summary>

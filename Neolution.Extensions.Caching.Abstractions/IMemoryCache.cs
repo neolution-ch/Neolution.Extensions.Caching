@@ -55,7 +55,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <param name="id">The cache identifier.</param>
         /// <param name="value">The value to cache.</param>
         /// <param name="options">The options.</param>
-        void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions options);
+        void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions? options);
 
         /// <summary>
         /// Create or overwrite an entry in the cache with options.
@@ -65,7 +65,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <param name="key">An object identifying the entry.</param>
         /// <param name="value">The value to cache.</param>
         /// <param name="options">The options.</param>
-        void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions options);
+        void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions? options);
 
         /// <summary>
         /// Removes the object associated with the given id.

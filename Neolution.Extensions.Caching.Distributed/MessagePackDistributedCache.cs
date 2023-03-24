@@ -70,14 +70,14 @@
         }
 
         /// <inheritdoc />
-        protected override void SetCacheObject<T>(string key, T value, CacheEntryOptions options)
+        protected override void SetCacheObject<T>(string key, T value, CacheEntryOptions? options)
         {
             var bytes = MessagePackSerializer.Serialize(value, this.serializerOptions);
             this.cache.Set(key, bytes, ConvertOptions(options));
         }
 
         /// <inheritdoc />
-        protected override async Task SetCacheObjectAsync<T>(string key, T value, CacheEntryOptions options, CancellationToken token)
+        protected override async Task SetCacheObjectAsync<T>(string key, T value, CacheEntryOptions? options, CancellationToken token)
         {
             var bytes = MessagePackSerializer.Serialize(value, this.serializerOptions, token);
             await this.cache.SetAsync(key, bytes, ConvertOptions(options), token).ConfigureAwait(false);
@@ -100,7 +100,7 @@
         /// </summary>
         /// <param name="options">The options.</param>
         /// <returns>The <see cref="DistributedCacheEntryOptions"/>.</returns>
-        private static DistributedCacheEntryOptions ConvertOptions(CacheEntryOptions options)
+        private static DistributedCacheEntryOptions ConvertOptions(CacheEntryOptions? options)
         {
             if (options == null)
             {

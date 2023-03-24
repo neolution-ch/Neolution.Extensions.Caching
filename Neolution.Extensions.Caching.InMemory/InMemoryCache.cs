@@ -32,7 +32,7 @@
         }
 
         /// <inheritdoc />
-        protected override void SetCacheObject<T>(string key, T value, CacheEntryOptions options)
+        protected override void SetCacheObject<T>(string key, T value, CacheEntryOptions? options)
         {
             var opt = new MemoryCacheEntryOptions();
             if (options != null)

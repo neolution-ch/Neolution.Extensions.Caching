@@ -31,26 +31,28 @@
         }
 
         /// <inheritdoc />
-        protected override T GetCacheObject<T>(string key)
+        protected override T? GetCacheObject<T>(string key)
+            where T : class
         {
             return this.GetCacheObjectAsync<T>(key, default).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <inheritdoc />
-        protected override async Task<T> GetCacheObjectAsync<T>(string key, CancellationToken token)
+        protected override async Task<T?> GetCacheObjectAsync<T>(string key, CancellationToken token)
+            where T : class
         {
             var entry = await this.cacheClient.GetAsync<T>(key).ConfigureAwait(false);
             return entry.HasValue ? entry.Value : null;
         }
 
         /// <inheritdoc />
-        protected override void SetCacheObject<T>(string key, T value, CacheEntryOptions options)
+        protected override void SetCacheObject<T>(string key, T value, CacheEntryOptions? options)
         {
             this.SetCacheObjectAsync(key, value, options, default).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <inheritdoc />
-        protected override async Task SetCacheObjectAsync<T>(string key, T value, CacheEntryOptions options, CancellationToken token)
+        protected override async Task SetCacheObjectAsync<T>(string key, T value, CacheEntryOptions? options, CancellationToken token)
         {
             options ??= new CacheEntryOptions();
             await this.cacheClient.SetAsync(key, value, options.AbsoluteExpirationRelativeToNow).ConfigureAwait(false);

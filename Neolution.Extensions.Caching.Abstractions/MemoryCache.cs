@@ -12,60 +12,62 @@
         /// <summary>
         /// Gets the name of the cache.
         /// </summary>
-        /// <value>
-        /// The name of the cache.
-        /// </value>
         private static string CacheIdName => typeof(TCacheId).Name;
 
         /// <inheritdoc />
         public T Get<T>(TCacheId id)
         {
-            return this.Get<T>(id, null);
+            var cacheKey = CreateCacheKey(id);
+            return this.GetCacheObject<T>(cacheKey);
         }
 
         /// <inheritdoc />
         public T Get<T>(TCacheId id, string key)
         {
-            key = CreateCacheKey(id, key);
-            return this.GetCacheObject<T>(key);
+            var cacheKey = CreateCacheKey(id, key);
+            return this.GetCacheObject<T>(cacheKey);
         }
 
         /// <inheritdoc />
         public void Set<T>(TCacheId id, T value)
         {
-            this.SetWithOptions(id, null, value, null);
+            var cacheKey = CreateCacheKey(id);
+            this.SetCacheObject(cacheKey, value, new CacheEntryOptions());
         }
 
         /// <inheritdoc />
         public void Set<T>(TCacheId id, string key, T value)
         {
-            this.SetWithOptions(id, key, value, null);
+            var cacheKey = CreateCacheKey(id, key);
+            this.SetCacheObject(cacheKey, value, new CacheEntryOptions());
         }
 
         /// <inheritdoc />
-        public void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions options)
+        public void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions? options)
         {
-            this.SetWithOptions(id, null, value, options);
+            var cacheKey = CreateCacheKey(id);
+            this.SetCacheObject(cacheKey, value, options);
         }
 
         /// <inheritdoc />
-        public void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions options)
+        public void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions? options)
         {
-            key = CreateCacheKey(id, key);
-            this.SetCacheObject(key, value, options);
+            var cacheKey = CreateCacheKey(id, key);
+            this.SetCacheObject(cacheKey, value, options);
         }
 
         /// <inheritdoc />
         public void Remove(TCacheId id)
         {
-            this.Remove(id, null);
+            var cacheKey = CreateCacheKey(id);
+            this.RemoveCacheObject(cacheKey);
         }
 
         /// <inheritdoc />
         public void Remove(TCacheId id, string key)
         {
-            key = CreateCacheKey(id, key);
-            this.RemoveCacheObject(key);
+            var cacheKey = CreateCacheKey(id, key);
+            this.RemoveCacheObject(cacheKey);
         }
 
         /// <summary>
@@ -83,7 +85,7 @@
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="options">The options.</param>
-        protected abstract void SetCacheObject<T>(string key, T value, CacheEntryOptions options);
+        protected abstract void SetCacheObject<T>(string key, T value, CacheEntryOptions? options);
 
         /// <summary>
         /// Resets the object in the cache.
@@ -97,7 +99,7 @@
         /// <param name="container">The container.</param>
         /// <param name="key">The key.</param>
         /// <returns>The cache key</returns>
-        private static string CreateCacheKey(TCacheId container, string key = null)
+        private static string CreateCacheKey(TCacheId container, string? key = null)
         {
             var containerName = container.ToString();
             if (!string.IsNullOrWhiteSpace(key))
