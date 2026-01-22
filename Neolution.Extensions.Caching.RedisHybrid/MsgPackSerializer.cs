@@ -25,7 +25,8 @@
         /// <returns>The deserialized object</returns>
         public object Deserialize(Stream data, Type objectType)
         {
-            return MessagePackSerializer.Deserialize(objectType, data, this.options);
+            return MessagePackSerializer.Deserialize(objectType, data, this.options)
+                ?? throw new InvalidOperationException($"Deserialization returned null for type '{objectType}'.");
         }
 
         /// <summary>
