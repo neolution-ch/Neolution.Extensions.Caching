@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Foundatio.Redis" Version="10.6.0" />
-    <PackageReference Include="MessagePack" Version="2.5.187" />
+    <PackageReference Include="MessagePack" Version="2.5.198" />
     <PackageReference Include="Neolution.CodeAnalysis" Version="2.6.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
