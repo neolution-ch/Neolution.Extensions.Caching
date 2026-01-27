@@ -1,6 +1,7 @@
 ﻿namespace Neolution.Extensions.Caching.Abstractions
 {
     using System;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -12,12 +13,32 @@
         where TCacheId : struct, Enum
     {
         /// <summary>
+        /// Maximum allowed cache key length in bytes (UTF-8 encoded).
+        /// This ensures performance and compatibility with limits of certain cache backends.
+        /// </summary>
+        private const int MaxCacheKeyBytes = 250;
+
+        /// <summary>
         /// Gets the name of the cache.
         /// </summary>
         /// <value>
         /// The name of the cache.
         /// </value>
         private static string CacheIdName => typeof(TCacheId).Name;
+
+        /// <summary>
+        /// Gets a value indicating whether optional cache keys should be URL-encoded.
+        /// Default is true for safe handling of special characters.
+        /// Set to false to maintain backwards compatibility with existing cache keys.
+        /// </summary>
+        protected virtual bool EnableKeyEncoding => true;
+
+        /// <summary>
+        /// Gets a value indicating whether cache key length should be validated.
+        /// Default is true to ensure performance and compatibility with many cache backends.
+        /// Set to false to disable length validation if your cache backend supports longer keys.
+        /// </summary>
+        protected virtual bool EnableKeyLengthValidation => true;
 
         /// <summary>
         /// Gets the cache key version for invalidation purposes.
@@ -213,6 +234,30 @@
         protected abstract Task RemoveCacheObjectAsync(string key, CancellationToken token);
 
         /// <summary>
+        /// Gets the cache key string for an enum value.
+        /// If the enum value has a <see cref="CacheKeyAttribute"/>, uses the explicit key.
+        /// Otherwise, uses the enum member name (ToString()).
+        /// </summary>
+        /// <param name="id">The cache identifier enum value.</param>
+        /// <returns>The cache key string to use.</returns>
+        private static string GetCacheKeyString(TCacheId id)
+        {
+            var enumType = typeof(TCacheId);
+            var memberName = id.ToString();
+            var memberInfo = enumType.GetField(memberName);
+
+            if (memberInfo == null)
+            {
+                return memberName;
+            }
+
+            // Check for CacheKeyAttribute
+            var attribute = (CacheKeyAttribute?)Attribute.GetCustomAttribute(memberInfo, typeof(CacheKeyAttribute));
+
+            return attribute?.Key ?? memberName;
+        }
+
+        /// <summary>
         /// Creates the full key to use for the underlying cache implementation.
         /// </summary>
         /// <param name="id">The cache id.</param>
@@ -220,10 +265,14 @@
         /// <returns>The caching key.</returns>
         private string CreateCacheKey(TCacheId id, string? key = null)
         {
-            var cacheKey = id.ToString();
+            // Use attribute value if present, otherwise enum name
+            var cacheKey = GetCacheKeyString(id);
+
             if (!string.IsNullOrWhiteSpace(key))
             {
-                cacheKey = $"{cacheKey}_{key}";
+                // URL-encode the key if enabled
+                var processedKey = this.EnableKeyEncoding ? Uri.EscapeDataString(key) : key;
+                cacheKey = $"{cacheKey}_{processedKey}";
             }
 
             var fullKey = CacheIdName;
@@ -240,6 +289,21 @@
             if (!string.IsNullOrWhiteSpace(this.EnvironmentPrefix))
             {
                 fullKey = $"{this.EnvironmentPrefix}:{fullKey}";
+            }
+
+            // Optional validation - check total key length if enabled
+            if (this.EnableKeyLengthValidation)
+            {
+                var keyBytes = Encoding.UTF8.GetByteCount(fullKey);
+
+                if (keyBytes > MaxCacheKeyBytes)
+                {
+                    throw new ArgumentException(
+                        $"Generated cache key exceeds maximum length of {MaxCacheKeyBytes} bytes. " +
+                        $"Current key is {keyBytes} bytes: '{fullKey}'. " +
+                        $"Consider using a shorter optional key or shorter enum names.",
+                        nameof(key));
+                }
             }
 
             return fullKey;

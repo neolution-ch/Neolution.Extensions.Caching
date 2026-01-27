@@ -102,6 +102,7 @@
         private static string CreateCacheKey(TCacheId container, string? key = null)
         {
             var containerName = container.ToString();
+
             if (!string.IsNullOrWhiteSpace(key))
             {
                 containerName = $"{containerName}_{key}";
