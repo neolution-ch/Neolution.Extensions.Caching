@@ -4,8 +4,15 @@
     /// Base class for distributed cache configuration options.
     /// Provides common configuration properties shared across all distributed cache implementations.
     /// </summary>
-    public abstract class DistributedCacheOptionsBase
+    public class DistributedCacheOptionsBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DistributedCacheOptionsBase"/> class.
+        /// </summary>
+        protected DistributedCacheOptionsBase()
+        {
+        }
+
         /// <summary>
         /// Gets or sets the cache key version for invalidation purposes.
         /// If null, version is not included in the cache key.

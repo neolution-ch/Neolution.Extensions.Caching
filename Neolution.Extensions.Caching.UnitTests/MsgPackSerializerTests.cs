@@ -159,7 +159,7 @@
             return new TestObject
             {
                 Name = largeString,
-                Value = 999
+                Value = 999,
             };
         }
     }

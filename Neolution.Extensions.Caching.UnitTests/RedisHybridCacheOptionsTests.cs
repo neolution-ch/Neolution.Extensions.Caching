@@ -33,7 +33,7 @@
             // Arrange
             var options = new RedisHybridCacheOptions
             {
-                EnableCompression = true
+                EnableCompression = true,
             };
 
             // Act & Assert
@@ -103,7 +103,7 @@
                 Version = 5,
                 EnvironmentPrefix = "prod",
                 EnableKeyEncoding = false,
-                EnableKeyLengthValidation = false
+                EnableKeyLengthValidation = false,
             };
 
             // Assert

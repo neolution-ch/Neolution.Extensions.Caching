@@ -39,15 +39,18 @@
         }
 
         /// <summary>
-        /// Tests if cache key includes version by default
+        /// Tests if cache key includes version when configured
         /// </summary>
         [Fact]
-        public void MessagePackCacheKeyIncludesDefaultVersion()
+        public void MessagePackCacheKeyIncludesConfiguredVersion()
         {
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddSerializedDistributedCache();
+            services.AddSerializedDistributedCache(options =>
+            {
+                options.Version = 1;
+            });
 
             using var serviceProvider = services.BuildServiceProvider();
             var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
@@ -56,7 +59,7 @@
             // Act
             cache.Set(TestCacheId.Foobar, testValue);
 
-            // Assert - Verify we can retrieve the value (key format is correct)
+            // Assert - Verify we can retrieve the value (version is included in key)
             cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
         }
 
@@ -203,6 +206,7 @@
         /// <summary>
         /// Tests if null or empty environment prefix is handled correctly
         /// </summary>
+        /// <param name="environmentPrefix">The environment prefix to test.</param>
         [Theory]
         [InlineData(null)]
         [InlineData("")]

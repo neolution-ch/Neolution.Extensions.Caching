@@ -81,6 +81,7 @@
             // Arrange
             using var serviceProvider = CreateServiceCollection().BuildServiceProvider();
             var cache = GetCache(serviceProvider);
+
             // In-memory cache has no length restriction
             var longKey = new string('x', 500);
             const string value = "test-value";

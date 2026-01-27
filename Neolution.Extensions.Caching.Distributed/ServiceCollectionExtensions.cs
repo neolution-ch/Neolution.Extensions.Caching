@@ -50,8 +50,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     An IDistributedCache provider must be registered before calling AddSerializedDistributedCache().
                     Register a provider such as Redis (AddStackExchangeRedisCache), SQL Server (AddDistributedSqlServerCache),
                     or Memory (AddDistributedMemoryCache) first.
-                    """
-                );
+                    """);
             }
 
             services.AddOptions();

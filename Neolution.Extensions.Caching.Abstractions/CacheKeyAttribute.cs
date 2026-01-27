@@ -1,4 +1,4 @@
-namespace Neolution.Extensions.Caching.Abstractions
+﻿namespace Neolution.Extensions.Caching.Abstractions
 {
     using System;
 
@@ -17,14 +17,9 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <exception cref="ArgumentException">Thrown when key is empty or whitespace.</exception>
         public CacheKeyAttribute(string key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentException("Cache key cannot be empty or whitespace.", nameof(key));
+                throw new ArgumentException("Cache key cannot be null, empty or whitespace.", nameof(key));
             }
 
             this.Key = key;

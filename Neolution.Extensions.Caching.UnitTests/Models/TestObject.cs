@@ -1,4 +1,4 @@
-namespace Neolution.Extensions.Caching.UnitTests.Models
+﻿namespace Neolution.Extensions.Caching.UnitTests.Models
 {
     /// <summary>
     /// A simple test object for unit testing.

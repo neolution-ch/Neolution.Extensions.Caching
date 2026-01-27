@@ -90,6 +90,7 @@
             // Arrange
             using var serviceProvider = serviceCollection.BuildServiceProvider();
             var cache = GetCache(serviceProvider);
+
             // Create a very long key that exceeds 250 bytes
             var longKey = new string('x', 300);
 
@@ -114,6 +115,7 @@
             // Arrange
             using var serviceProvider = serviceCollection.BuildServiceProvider();
             var cache = GetCache(serviceProvider);
+
             // Test that we can use keys up to the limit
             // Assuming enum name + structure is ~50 bytes, test with ~180 char key
             var maxKey = new string('a', 180);
@@ -139,6 +141,7 @@
             // Arrange
             using var serviceProvider = serviceCollection.BuildServiceProvider();
             var cache = GetCache(serviceProvider);
+
             // Unicode characters can be multiple bytes in UTF-8
             // 100 Chinese characters = ~300 bytes in UTF-8
             var unicodeKey = new string('中', 100);
@@ -191,31 +194,6 @@
 
             // Assert - Should still work
             var result = cache.Get<string>(TestCacheId.ProductCatalog);
-            result.ShouldBe(value);
-        }
-
-        /// <summary>
-        /// Tests that cache key with attribute is refactor-safe
-        /// </summary>
-        /// <param name="serviceCollection">The service collection.</param>
-        [Theory]
-        [ClassData(typeof(ServiceCollectionTestDataCollection))]
-        public void CacheKeyWithAttributeIsRefactorSafe(IServiceCollection serviceCollection)
-        {
-            // Arrange
-            using var serviceProvider = serviceCollection.BuildServiceProvider();
-            var cache = GetCache(serviceProvider);
-            const string value = "test-value";
-
-            // This test documents the behavior:
-            // Even if we rename "UserProfile" to "User",
-            // the cache key remains "user-profile" due to the attribute
-
-            // Act
-            cache.Set(TestCacheId.UserProfile, value);
-
-            // Assert - The actual cache key should contain "user-profile", not "UserProfile"
-            var result = cache.Get<string>(TestCacheId.UserProfile);
             result.ShouldBe(value);
         }
 

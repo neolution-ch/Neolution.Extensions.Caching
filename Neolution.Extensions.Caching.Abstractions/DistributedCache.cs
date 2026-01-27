@@ -20,16 +20,23 @@
         private const int MaxCacheKeyBytes = 250;
 
         /// <summary>
-        /// Gets the name of the cache.
+        /// Indicates whether cache keys should be URL-encoded.
         /// </summary>
-        /// <value>
-        /// The name of the cache.
-        /// </value>
-        private static string CacheIdName => typeof(TCacheId).Name;
-
         private readonly bool enableKeyEncoding;
+
+        /// <summary>
+        /// Indicates whether cache key length validation is enabled.
+        /// </summary>
         private readonly bool enableKeyLengthValidation;
+
+        /// <summary>
+        /// The cache key version for invalidation purposes.
+        /// </summary>
         private readonly int? version;
+
+        /// <summary>
+        /// The environment prefix for cache key isolation.
+        /// </summary>
         private readonly string? environmentPrefix;
 
         /// <summary>
@@ -71,11 +78,19 @@
         /// </summary>
         protected string? EnvironmentPrefix => this.environmentPrefix;
 
+        /// <summary>
+        /// Gets the name of the cache.
+        /// </summary>
+        /// <value>
+        /// The name of the cache.
+        /// </value>
+        private static string CacheIdName => typeof(TCacheId).Name;
+
         /// <inheritdoc />
         public T? Get<T>(TCacheId id)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             return this.GetCacheObject<T>(cacheKey);
         }
 
@@ -83,7 +98,7 @@
         public T? Get<T>(TCacheId id, string key)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             return this.GetCacheObject<T>(cacheKey);
         }
 
@@ -91,7 +106,7 @@
         public Task<T?> GetAsync<T>(TCacheId id, CancellationToken token = default)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             return this.GetCacheObjectAsync<T>(cacheKey, token);
         }
 
@@ -99,7 +114,7 @@
         public Task<T?> GetAsync<T>(TCacheId id, string key, CancellationToken token = default)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             return this.GetCacheObjectAsync<T>(cacheKey, token);
         }
 
@@ -107,7 +122,7 @@
         public void Set<T>(TCacheId id, T value)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             this.SetCacheObject(cacheKey, value, new CacheEntryOptions());
         }
 
@@ -115,7 +130,7 @@
         public void Set<T>(TCacheId id, string key, T value)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             this.SetCacheObject(cacheKey, value, new CacheEntryOptions());
         }
 
@@ -123,7 +138,7 @@
         public Task SetAsync<T>(TCacheId id, T value, CancellationToken token = default)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             return this.SetCacheObjectAsync(cacheKey, value, new CacheEntryOptions(), token);
         }
 
@@ -131,7 +146,7 @@
         public Task SetAsync<T>(TCacheId id, string key, T value, CancellationToken token = default)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             return this.SetCacheObjectAsync(cacheKey, value, new CacheEntryOptions(), token);
         }
 
@@ -139,7 +154,7 @@
         public void SetWithOptions<T>(TCacheId id, T value, CacheEntryOptions? options)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             this.SetCacheObject(cacheKey, value, options);
         }
 
@@ -147,7 +162,7 @@
         public void SetWithOptions<T>(TCacheId id, string key, T value, CacheEntryOptions? options)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             this.SetCacheObject(cacheKey, value, options);
         }
 
@@ -155,7 +170,7 @@
         public Task SetWithOptionsAsync<T>(TCacheId id, T value, CacheEntryOptions? options, CancellationToken token = default)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             return this.SetCacheObjectAsync(cacheKey, value, options, token);
         }
 
@@ -163,35 +178,35 @@
         public Task SetWithOptionsAsync<T>(TCacheId id, string key, T value, CacheEntryOptions? options, CancellationToken token = default)
             where T : class
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             return this.SetCacheObjectAsync(cacheKey, value, options, token);
         }
 
         /// <inheritdoc />
         public void Remove(TCacheId id)
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             this.RemoveCacheObject(cacheKey);
         }
 
         /// <inheritdoc />
         public void Remove(TCacheId id, string key)
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             this.RemoveCacheObject(cacheKey);
         }
 
         /// <inheritdoc />
         public Task RemoveAsync(TCacheId id, CancellationToken token = default)
         {
-            var cacheKey = CreateCacheKey(id);
+            var cacheKey = this.CreateCacheKey(id);
             return this.RemoveCacheObjectAsync(cacheKey, token);
         }
 
         /// <inheritdoc />
         public Task RemoveAsync(TCacheId id, string key, CancellationToken token = default)
         {
-            var cacheKey = CreateCacheKey(id, key);
+            var cacheKey = this.CreateCacheKey(id, key);
             return this.RemoveCacheObjectAsync(cacheKey, token);
         }
 
