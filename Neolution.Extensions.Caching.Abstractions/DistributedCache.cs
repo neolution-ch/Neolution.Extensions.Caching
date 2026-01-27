@@ -4,6 +4,7 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Options;
 
     /// <inheritdoc />
     /// <summary>
@@ -26,31 +27,49 @@
         /// </value>
         private static string CacheIdName => typeof(TCacheId).Name;
 
+        private readonly bool enableKeyEncoding;
+        private readonly bool enableKeyLengthValidation;
+        private readonly int? version;
+        private readonly string? environmentPrefix;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DistributedCache{TCacheId}"/> class.
+        /// </summary>
+        /// <param name="optionsAccessor">The options accessor containing cache configuration.</param>
+        /// <exception cref="ArgumentNullException">Thrown when optionsAccessor is null.</exception>
+        protected DistributedCache(IOptions<DistributedCacheOptionsBase> optionsAccessor)
+        {
+            if (optionsAccessor == null)
+            {
+                throw new ArgumentNullException(nameof(optionsAccessor));
+            }
+
+            var options = optionsAccessor.Value;
+            this.enableKeyEncoding = options.EnableKeyEncoding;
+            this.enableKeyLengthValidation = options.EnableKeyLengthValidation;
+            this.version = options.Version;
+            this.environmentPrefix = options.EnvironmentPrefix;
+        }
+
         /// <summary>
         /// Gets a value indicating whether optional cache keys should be URL-encoded.
-        /// Default is true for safe handling of special characters.
-        /// Set to false to maintain backwards compatibility with existing cache keys.
         /// </summary>
-        protected virtual bool EnableKeyEncoding => true;
+        protected bool EnableKeyEncoding => this.enableKeyEncoding;
 
         /// <summary>
         /// Gets a value indicating whether cache key length should be validated.
-        /// Default is true to ensure performance and compatibility with many cache backends.
-        /// Set to false to disable length validation if your cache backend supports longer keys.
         /// </summary>
-        protected virtual bool EnableKeyLengthValidation => true;
+        protected bool EnableKeyLengthValidation => this.enableKeyLengthValidation;
 
         /// <summary>
         /// Gets the cache key version for invalidation purposes.
-        /// If null, version is not included in the cache key.
         /// </summary>
-        protected virtual int? Version => null;
+        protected int? Version => this.version;
 
         /// <summary>
         /// Gets the optional environment prefix for cache key isolation.
-        /// If null or empty, environment prefix is not included in the cache key.
         /// </summary>
-        protected virtual string? EnvironmentPrefix => null;
+        protected string? EnvironmentPrefix => this.environmentPrefix;
 
         /// <inheritdoc />
         public T? Get<T>(TCacheId id)

@@ -33,6 +33,7 @@
         /// <param name="cache">The cache.</param>
         /// <param name="optionsAccessor">The options accessor.</param>
         public MessagePackDistributedCache(IDistributedCache cache, IOptions<MessagePackDistributedCacheOptions> optionsAccessor)
+            : base(optionsAccessor)
         {
             this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
 
@@ -42,8 +43,6 @@
             }
 
             var options = optionsAccessor.Value;
-            this.Version = options.Version;
-            this.EnvironmentPrefix = options.EnvironmentPrefix;
 
             if (options.RequireMessagePackObjectAnnotation)
             {
@@ -55,12 +54,6 @@
                 this.serializerOptions = this.serializerOptions.WithCompression(MessagePackCompression.None);
             }
         }
-
-        /// <inheritdoc />
-        protected override int? Version { get; }
-
-        /// <inheritdoc />
-        protected override string? EnvironmentPrefix { get; }
 
         /// <inheritdoc />
         protected override T? GetCacheObject<T>(string key)

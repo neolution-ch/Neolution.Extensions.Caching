@@ -14,22 +14,26 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds the Neolution default non-distributed memory caching implementation.
+        /// Adds the Redis hybrid cache implementation (L1 + L2 caching with message broker synchronization).
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="redisConnectionString">The redis connection string.</param>
-        public static void AddRedisHybridCache(this IServiceCollection services, string redisConnectionString)
+        /// <param name="services">The service collection.</param>
+        /// <param name="redisConnectionString">The Redis connection string.</param>
+        /// <returns>The service collection for fluent chaining.</returns>
+        public static IServiceCollection AddRedisHybridCache(this IServiceCollection services, string redisConnectionString)
         {
-            services.AddRedisHybridCache(redisConnectionString, _ => { });
+            return services.AddRedisHybridCache(redisConnectionString, _ => { });
         }
 
         /// <summary>
-        /// Adds the Neolution default non-distributed memory caching implementation with configuration options.
+        /// Adds the Redis hybrid cache implementation (L1 + L2 caching with message broker synchronization),
+        /// with custom configuration options.
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="redisConnectionString">The redis connection string.</param>
-        /// <param name="configureOptions">The setup action.</param>
-        public static void AddRedisHybridCache(this IServiceCollection services, string redisConnectionString, Action<RedisHybridCacheOptions> configureOptions)
+        /// <param name="services">The service collection.</param>
+        /// <param name="redisConnectionString">The Redis connection string.</param>
+        /// <param name="configureOptions">The action to configure cache options.</param>
+        /// <returns>The service collection for fluent chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when configureOptions is null.</exception>
+        public static IServiceCollection AddRedisHybridCache(this IServiceCollection services, string redisConnectionString, Action<RedisHybridCacheOptions> configureOptions)
         {
             if (configureOptions == null)
             {
@@ -37,15 +41,25 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             services.AddSingleton<IConnectionMultiplexer>(sp => ConnectionMultiplexer.Connect(redisConnectionString));
-            services.AddSingleton<ICacheClient>(sp => new RedisHybridCacheClient(new RedisHybridCacheClientOptions
-            {
-                ConnectionMultiplexer = sp.GetService<IConnectionMultiplexer>(),
-                LoggerFactory = sp.GetService<ILoggerFactory>(),
-            }));
 
             services.AddOptions();
             services.Configure(configureOptions);
+
+            services.AddSingleton<ICacheClient>(sp =>
+            {
+                var options = sp.GetService<Microsoft.Extensions.Options.IOptions<RedisHybridCacheOptions>>();
+                var enableCompression = options?.Value?.EnableCompression ?? false;
+
+                return new RedisHybridCacheClient(new RedisHybridCacheClientOptions
+                {
+                    ConnectionMultiplexer = sp.GetService<IConnectionMultiplexer>(),
+                    LoggerFactory = sp.GetService<ILoggerFactory>(),
+                    Serializer = new MsgPackSerializer(enableCompression),
+                });
+            });
             services.AddSingleton(typeof(IDistributedCache<>), typeof(RedisHybridCache<>));
+
+            return services;
         }
     }
 }

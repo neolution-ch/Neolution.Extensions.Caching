@@ -11,20 +11,28 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds the distributed caching implementation that uses MessagePack to serialize and deserialize the values to cache.
+        /// Adds the distributed caching implementation that uses MessagePack for serialization.
+        /// Requires an <see cref="Microsoft.Extensions.Caching.Distributed.IDistributedCache"/>
+        /// provider to be registered (e.g., Redis, SQL Server, Memory).
         /// </summary>
-        /// <param name="services">The services.</param>
-        public static void AddMessagePackDistributedCache(this IServiceCollection services)
+        /// <param name="services">The service collection.</param>
+        /// <returns>The service collection for fluent chaining.</returns>
+        public static IServiceCollection AddMessagePackDistributedCache(this IServiceCollection services)
         {
-            services.AddMessagePackDistributedCache(_ => { });
+            return services.AddMessagePackDistributedCache(_ => { });
         }
 
         /// <summary>
-        /// Adds the distributed caching implementation that uses MessagePack to serialize and deserialize the values to cache. Allows to configure options.
+        /// Adds the distributed caching implementation that uses MessagePack for serialization,
+        /// with custom configuration options.
+        /// Requires an <see cref="Microsoft.Extensions.Caching.Distributed.IDistributedCache"/>
+        /// provider to be registered (e.g., Redis, SQL Server, Memory).
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configureOptions">The setup action.</param>
-        public static void AddMessagePackDistributedCache(this IServiceCollection services, Action<MessagePackDistributedCacheOptions> configureOptions)
+        /// <param name="services">The service collection.</param>
+        /// <param name="configureOptions">The action to configure cache options.</param>
+        /// <returns>The service collection for fluent chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when configureOptions is null.</exception>
+        public static IServiceCollection AddMessagePackDistributedCache(this IServiceCollection services, Action<MessagePackDistributedCacheOptions> configureOptions)
         {
             if (configureOptions == null)
             {
@@ -34,6 +42,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddOptions();
             services.Configure(configureOptions);
             services.AddSingleton(typeof(IDistributedCache<>), typeof(MessagePackDistributedCache<>));
+
+            return services;
         }
     }
 }

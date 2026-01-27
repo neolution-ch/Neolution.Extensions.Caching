@@ -28,6 +28,7 @@
         /// <param name="cacheClient">The cache client.</param>
         /// <param name="optionsAccessor">The options accessor.</param>
         public RedisHybridCache(ICacheClient cacheClient, IOptions<RedisHybridCacheOptions> optionsAccessor)
+            : base(optionsAccessor)
         {
             this.cacheClient = cacheClient ?? throw new ArgumentNullException(nameof(cacheClient));
 
@@ -35,17 +36,7 @@
             {
                 throw new ArgumentNullException(nameof(optionsAccessor));
             }
-
-            var options = optionsAccessor.Value;
-            this.Version = options.Version;
-            this.EnvironmentPrefix = options.EnvironmentPrefix;
         }
-
-        /// <inheritdoc />
-        protected override int? Version { get; }
-
-        /// <inheritdoc />
-        protected override string? EnvironmentPrefix { get; }
 
         /// <inheritdoc />
         protected override T? GetCacheObject<T>(string key)

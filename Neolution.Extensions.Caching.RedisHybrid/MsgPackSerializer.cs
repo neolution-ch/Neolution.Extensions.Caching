@@ -12,10 +12,28 @@
     public class MsgPackSerializer : ISerializer
     {
         /// <summary>
-        /// The options
+        /// The MessagePack serializer options.
         /// </summary>
-        private readonly MessagePackSerializerOptions options = MessagePack.Resolvers.ContractlessStandardResolver.Options
-            .WithCompression(MessagePackCompression.Lz4BlockArray);
+        private readonly MessagePackSerializerOptions options;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MsgPackSerializer"/> class.
+        /// Compression is disabled by default to save CPU for in-memory scenarios.
+        /// </summary>
+        public MsgPackSerializer()
+            : this(false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MsgPackSerializer"/> class.
+        /// </summary>
+        /// <param name="enableCompression">If set to <c>true</c>, enables LZ4 compression.</param>
+        public MsgPackSerializer(bool enableCompression)
+        {
+            this.options = MessagePack.Resolvers.ContractlessStandardResolver.Options
+                .WithCompression(enableCompression ? MessagePackCompression.Lz4BlockArray : MessagePackCompression.None);
+        }
 
         /// <summary>
         /// Deserializes the specified data.

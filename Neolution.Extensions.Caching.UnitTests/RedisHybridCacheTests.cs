@@ -125,14 +125,12 @@
             var services = new ServiceCollection();
             this.Log.MinimumLevel = LogLevel.Trace;
             services.AddSingleton<ILoggerFactory>(this.Log);
-            services.AddSingleton<IConnectionMultiplexer>(sp => ConnectionMultiplexer.Connect("localhost"));
-            services.AddSingleton<ICacheClient>(sp => new RedisHybridCacheClient(new RedisHybridCacheClientOptions
+            services.AddRedisHybridCache("localhost", options =>
             {
-                ConnectionMultiplexer = sp.GetService<IConnectionMultiplexer>(),
-                LoggerFactory = sp.GetService<ILoggerFactory>(),
-            }));
-
-            services.AddSingleton(typeof(IDistributedCache<>), typeof(RedisHybridCache<>));
+                // Example: Enable compression if Redis bandwidth is a concern
+                options.EnableCompression = false; // Default is false for CPU optimization
+                options.Version = 1;
+            });
 
             return services;
         }

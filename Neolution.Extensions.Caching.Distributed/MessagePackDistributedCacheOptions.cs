@@ -1,48 +1,25 @@
 ﻿namespace Neolution.Extensions.Caching.Distributed
 {
-    using Microsoft.Extensions.Options;
+    using Neolution.Extensions.Caching.Abstractions;
 
     /// <summary>
-    /// The options for the MessagePack distributed cache implementation.
+    /// Configuration options for MessagePack distributed cache.
     /// </summary>
-    public class MessagePackDistributedCacheOptions : IOptions<MessagePackDistributedCacheOptions>
+    public class MessagePackDistributedCacheOptions : DistributedCacheOptionsBase
     {
         /// <summary>
-        /// Gets or sets a value indicating whether to disable compression, to not waste CPU resources if working with an in-memory cache backend.
+        /// Gets or sets a value indicating whether to disable compression.
+        /// Set to true to save CPU when using in-memory cache backends.
+        /// Default: false (compression enabled with LZ4).
         /// </summary>
         public bool DisableCompression { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to require <see cref="MessagePack.MessagePackObjectAttribute"/> annotation for serializable types.
-        /// Doing so would result in better overall serialization performance and smaller files.
+        /// Gets or sets a value indicating whether to require MessagePackObject attribute.
+        /// Setting this to true improves serialization performance but requires decorating
+        /// your classes with [MessagePackObject] attribute.
+        /// Default: false (uses contractless serialization).
         /// </summary>
-        /// <value>
-        ///   <c>true</c> to require <see cref="MessagePack.MessagePackObjectAttribute"/> annotation; otherwise, <c>false</c>.
-        /// </value>
         public bool RequireMessagePackObjectAnnotation { get; set; }
-
-        /// <summary>
-        /// Gets or sets the cache key version to use for cache invalidation.
-        /// If not set, version is not included in the cache key.
-        /// Changing this version will invalidate all existing cache keys with that version.
-        /// The version will be formatted as "v{number}" in the cache key (e.g., v1, v2).
-        /// </summary>
-        /// <value>
-        /// The cache key version. Defaults to null (no version in cache key).
-        /// </value>
-        public int? Version { get; set; }
-
-        /// <summary>
-        /// Gets or sets the optional environment prefix for cache key isolation.
-        /// If not set, environment prefix is not included in the cache key.
-        /// Useful for multi-environment scenarios (e.g., "dev", "staging", "prod").
-        /// </summary>
-        /// <value>
-        /// The environment prefix. Defaults to null (no environment prefix in cache key).
-        /// </value>
-        public string? EnvironmentPrefix { get; set; }
-
-        /// <inheritdoc />
-        public MessagePackDistributedCacheOptions Value => this;
     }
 }
