@@ -5,7 +5,7 @@
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
-    /// Test data to test different MessagePack cache configurations.
+    /// Test data to test different serialized cache configurations.
     /// </summary>
     public class ServiceCollectionTestDataCollection : IEnumerable<object[]>
     {
@@ -19,11 +19,11 @@
                 switch (i)
                 {
                     case 0:
-                        services.AddDistributedMemoryCache().AddMessagePackDistributedCache();
+                        services.AddDistributedMemoryCache().AddSerializedDistributedCache();
                         yield return new object[] { services };
                         break;
                     case 1:
-                        services.AddDistributedMemoryCache().AddMessagePackDistributedCache(options => { options.DisableCompression = true; });
+                        services.AddDistributedMemoryCache().AddSerializedDistributedCache(options => { options.DisableCompression = true; });
                         yield return new object[] { services };
                         break;
                 }

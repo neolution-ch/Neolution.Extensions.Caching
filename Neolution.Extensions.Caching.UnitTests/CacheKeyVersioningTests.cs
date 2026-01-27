@@ -25,7 +25,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddMessagePackDistributedCache(); // No options - should not include version
+            services.AddSerializedDistributedCache(); // No options - should not include version
 
             using var serviceProvider = services.BuildServiceProvider();
             var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
@@ -47,7 +47,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddMessagePackDistributedCache();
+            services.AddSerializedDistributedCache();
 
             using var serviceProvider = services.BuildServiceProvider();
             var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
@@ -69,7 +69,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddMessagePackDistributedCache(options =>
+            services.AddSerializedDistributedCache(options =>
             {
                 options.Version = 2;
             });
@@ -94,11 +94,11 @@
             // Arrange - Create two service providers with different versions
             var servicesV1 = new ServiceCollection();
             servicesV1.AddDistributedMemoryCache();
-            servicesV1.AddMessagePackDistributedCache(options => options.Version = 1);
+            servicesV1.AddSerializedDistributedCache(options => options.Version = 1);
 
             var servicesV2 = new ServiceCollection();
             servicesV2.AddDistributedMemoryCache();
-            servicesV2.AddMessagePackDistributedCache(options => options.Version = 2);
+            servicesV2.AddSerializedDistributedCache(options => options.Version = 2);
 
             using var providerV1 = servicesV1.BuildServiceProvider();
             using var providerV2 = servicesV2.BuildServiceProvider();
@@ -128,7 +128,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddMessagePackDistributedCache(options =>
+            services.AddSerializedDistributedCache(options =>
             {
                 options.EnvironmentPrefix = "dev";
             });
@@ -153,7 +153,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddMessagePackDistributedCache(options =>
+            services.AddSerializedDistributedCache(options =>
             {
                 options.Version = 2;
                 options.EnvironmentPrefix = "prod";
@@ -179,7 +179,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddMessagePackDistributedCache(options =>
+            services.AddSerializedDistributedCache(options =>
             {
                 options.Version = 2;
                 options.EnvironmentPrefix = "staging";
@@ -212,7 +212,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddMessagePackDistributedCache(options =>
+            services.AddSerializedDistributedCache(options =>
             {
                 options.EnvironmentPrefix = environmentPrefix;
             });
