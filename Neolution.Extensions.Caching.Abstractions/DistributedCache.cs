@@ -19,6 +19,18 @@
         /// </value>
         private static string CacheIdName => typeof(TCacheId).Name;
 
+        /// <summary>
+        /// Gets the cache key version for invalidation purposes.
+        /// If null, version is not included in the cache key.
+        /// </summary>
+        protected virtual int? Version => null;
+
+        /// <summary>
+        /// Gets the optional environment prefix for cache key isolation.
+        /// If null or empty, environment prefix is not included in the cache key.
+        /// </summary>
+        protected virtual string? EnvironmentPrefix => null;
+
         /// <inheritdoc />
         public T? Get<T>(TCacheId id)
             where T : class
@@ -206,7 +218,7 @@
         /// <param name="id">The cache id.</param>
         /// <param name="key">The key of the cache entry.</param>
         /// <returns>The caching key.</returns>
-        private static string CreateCacheKey(TCacheId id, string? key = null)
+        private string CreateCacheKey(TCacheId id, string? key = null)
         {
             var cacheKey = id.ToString();
             if (!string.IsNullOrWhiteSpace(key))
@@ -214,7 +226,23 @@
                 cacheKey = $"{cacheKey}_{key}";
             }
 
-            return $"{CacheIdName}:{cacheKey}";
+            var fullKey = CacheIdName;
+
+            // Add version if specified
+            if (this.Version.HasValue)
+            {
+                fullKey = $"{fullKey}:v{this.Version.Value}";
+            }
+
+            fullKey = $"{fullKey}:{cacheKey}";
+
+            // Add environment prefix if specified
+            if (!string.IsNullOrWhiteSpace(this.EnvironmentPrefix))
+            {
+                fullKey = $"{this.EnvironmentPrefix}:{fullKey}";
+            }
+
+            return fullKey;
         }
     }
 }

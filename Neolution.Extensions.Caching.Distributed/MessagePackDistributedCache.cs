@@ -42,6 +42,9 @@
             }
 
             var options = optionsAccessor.Value;
+            this.Version = options.Version;
+            this.EnvironmentPrefix = options.EnvironmentPrefix;
+
             if (options.RequireMessagePackObjectAnnotation)
             {
                 this.serializerOptions = MessagePackSerializerOptions.Standard;
@@ -52,6 +55,12 @@
                 this.serializerOptions = this.serializerOptions.WithCompression(MessagePackCompression.None);
             }
         }
+
+        /// <inheritdoc />
+        protected override int? Version { get; }
+
+        /// <inheritdoc />
+        protected override string? EnvironmentPrefix { get; }
 
         /// <inheritdoc />
         protected override T? GetCacheObject<T>(string key)
