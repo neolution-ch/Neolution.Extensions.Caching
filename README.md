@@ -85,18 +85,19 @@ public void ConfigureServices(IServiceCollection services)
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    // Basic configuration
+    // Basic configuration with connection string
     services.AddRedisHybridCache("localhost:6379");
     
-    // OR with options
-    services.AddRedisHybridCache("localhost:6379", options =>
-    {
-        options.EnableCompression = false; // Disable compression for in-memory optimization (default: false)
-        options.Version = 1; // Optional: Cache key version (default: null)
-        options.EnvironmentPrefix = "prod"; // Optional: Environment prefix (default: null)
-        options.EnableKeyEncoding = true; // URL-encode optional keys (default: true)
-        options.EnableKeyLengthValidation = true; // Validate key length (default: true)
-    });
+    // OR: Share connection with other Redis services (Data Protection, Session, SignalR, etc.)
+    var multiplexer = ConnectionMultiplexer.Connect("localhost:6379");
+    services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+    
+    // Add cache using the shared connection
+    services.AddRedisHybridCache(multiplexer);
+    
+    // Use same shared connection for Data Protection Keys
+    services.AddDataProtection()
+        .PersistKeysToStackExchangeRedis(multiplexer, "DataProtection-Keys");
 }
 ```
 
