@@ -30,9 +30,9 @@
         private readonly bool enableKeyLengthValidation;
 
         /// <summary>
-        /// The cache key version for invalidation purposes.
+        /// The cache schema version for invalidation purposes.
         /// </summary>
-        private readonly int? version;
+        private readonly int? schemaVersion;
 
         /// <summary>
         /// The environment prefix for cache key isolation.
@@ -54,7 +54,7 @@
             var options = optionsAccessor.Value;
             this.enableKeyEncoding = options.EnableKeyEncoding;
             this.enableKeyLengthValidation = options.EnableKeyLengthValidation;
-            this.version = options.Version;
+            this.schemaVersion = options.SchemaVersion;
             this.environmentPrefix = options.EnvironmentPrefix;
         }
 
@@ -69,9 +69,9 @@
         protected bool EnableKeyLengthValidation => this.enableKeyLengthValidation;
 
         /// <summary>
-        /// Gets the cache key version for invalidation purposes.
+        /// Gets the cache schema version for invalidation purposes.
         /// </summary>
-        protected int? Version => this.version;
+        protected int? SchemaVersion => this.schemaVersion;
 
         /// <summary>
         /// Gets the optional environment prefix for cache key isolation.
@@ -311,10 +311,10 @@
 
             var fullKey = CacheIdName;
 
-            // Add version if specified
-            if (this.Version.HasValue)
+            // Add schema version if specified
+            if (this.SchemaVersion.HasValue)
             {
-                fullKey = $"{fullKey}:v{this.Version.Value}";
+                fullKey = $"{fullKey}:v{this.SchemaVersion.Value}";
             }
 
             fullKey = $"{fullKey}:{cacheKey}";

@@ -129,7 +129,7 @@
             {
                 // Example: Enable compression if Redis bandwidth is a concern
                 options.EnableCompression = false; // Default is false for CPU optimization
-                options.Version = 1;
+                options.SchemaVersion = 1;
             });
 
             return services;

@@ -17,7 +17,7 @@
     public class CacheKeyVersioningTests
     {
         /// <summary>
-        /// Tests backward compatibility - cache key without version by default
+        /// Tests backward compatibility - cache key without schema version by default
         /// </summary>
         [Fact]
         public void MessagePackCacheKeyWithoutVersionByDefault()
@@ -25,7 +25,7 @@
             // Arrange
             var services = new ServiceCollection();
             services.AddDistributedMemoryCache();
-            services.AddSerializedDistributedCache(); // No options - should not include version
+            services.AddSerializedDistributedCache(); // No options - should not include schema version
 
             using var serviceProvider = services.BuildServiceProvider();
             var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
@@ -39,7 +39,7 @@
         }
 
         /// <summary>
-        /// Tests if cache key includes version when configured
+        /// Tests if cache key includes schema version when configured
         /// </summary>
         [Fact]
         public void MessagePackCacheKeyIncludesConfiguredVersion()
@@ -49,7 +49,7 @@
             services.AddDistributedMemoryCache();
             services.AddSerializedDistributedCache(options =>
             {
-                options.Version = 1;
+                options.SchemaVersion = 1;
             });
 
             using var serviceProvider = services.BuildServiceProvider();
@@ -59,12 +59,12 @@
             // Act
             cache.Set(TestCacheId.Foobar, testValue);
 
-            // Assert - Verify we can retrieve the value (version is included in key)
+            // Assert - Verify we can retrieve the value (schema version is included in key)
             cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
         }
 
         /// <summary>
-        /// Tests if cache key includes custom version
+        /// Tests if cache key includes custom schema version
         /// </summary>
         [Fact]
         public void MessagePackCacheKeyIncludesCustomVersion()
@@ -74,7 +74,7 @@
             services.AddDistributedMemoryCache();
             services.AddSerializedDistributedCache(options =>
             {
-                options.Version = 2;
+                options.SchemaVersion = 2;
             });
 
             using var serviceProvider = services.BuildServiceProvider();
@@ -89,19 +89,19 @@
         }
 
         /// <summary>
-        /// Tests if different versions produce different cache keys
+        /// Tests if different schema versions produce different cache keys
         /// </summary>
         [Fact]
         public void DifferentVersionsProduceDifferentKeys()
         {
-            // Arrange - Create two service providers with different versions
+            // Arrange - Create two service providers with different schema versions
             var servicesV1 = new ServiceCollection();
             servicesV1.AddDistributedMemoryCache();
-            servicesV1.AddSerializedDistributedCache(options => options.Version = 1);
+            servicesV1.AddSerializedDistributedCache(options => options.SchemaVersion = 1);
 
             var servicesV2 = new ServiceCollection();
             servicesV2.AddDistributedMemoryCache();
-            servicesV2.AddSerializedDistributedCache(options => options.Version = 2);
+            servicesV2.AddSerializedDistributedCache(options => options.SchemaVersion = 2);
 
             using var providerV1 = servicesV1.BuildServiceProvider();
             using var providerV2 = servicesV2.BuildServiceProvider();
@@ -148,7 +148,7 @@
         }
 
         /// <summary>
-        /// Tests if cache key includes both version and environment prefix
+        /// Tests if cache key includes both schema version and environment prefix
         /// </summary>
         [Fact]
         public void MessagePackCacheKeyIncludesBothVersionAndEnvironment()
@@ -158,7 +158,7 @@
             services.AddDistributedMemoryCache();
             services.AddSerializedDistributedCache(options =>
             {
-                options.Version = 2;
+                options.SchemaVersion = 2;
                 options.EnvironmentPrefix = "prod";
             });
 
@@ -184,7 +184,7 @@
             services.AddDistributedMemoryCache();
             services.AddSerializedDistributedCache(options =>
             {
-                options.Version = 2;
+                options.SchemaVersion = 2;
                 options.EnvironmentPrefix = "staging";
             });
 
@@ -233,7 +233,7 @@
         }
 
         /// <summary>
-        /// Tests if RedisHybridCache key includes custom version
+        /// Tests if RedisHybridCache key includes custom schema version
         /// </summary>
         [Fact(Skip = "Requires Redis connection - integration test")]
         public void RedisHybridCacheKeyIncludesCustomVersion()
@@ -242,7 +242,7 @@
             var services = new ServiceCollection();
             services.AddRedisHybridCache("localhost:6379", options =>
             {
-                options.Version = 2;
+                options.SchemaVersion = 2;
                 options.EnvironmentPrefix = "test";
             });
 

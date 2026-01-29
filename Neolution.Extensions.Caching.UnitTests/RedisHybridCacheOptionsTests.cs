@@ -51,7 +51,7 @@
             services.AddRedisHybridCache("localhost:6379", options =>
             {
                 options.EnableCompression = true;
-                options.Version = 2;
+                options.SchemaVersion = 2;
                 options.EnvironmentPrefix = "test";
                 options.EnableKeyEncoding = false;
                 options.EnableKeyLengthValidation = false;
@@ -63,7 +63,7 @@
 
             // Assert
             options.Value.EnableCompression.ShouldBeTrue();
-            options.Value.Version.ShouldBe(2);
+            options.Value.SchemaVersion.ShouldBe(2);
             options.Value.EnvironmentPrefix.ShouldBe("test");
             options.Value.EnableKeyEncoding.ShouldBeFalse();
             options.Value.EnableKeyLengthValidation.ShouldBeFalse();
@@ -85,7 +85,7 @@
 
             // Assert
             options.Value.EnableCompression.ShouldBeFalse(); // Default is false
-            options.Value.Version.ShouldBeNull();
+            options.Value.SchemaVersion.ShouldBeNull();
             options.Value.EnvironmentPrefix.ShouldBeNull();
             options.Value.EnableKeyEncoding.ShouldBeTrue(); // Default is true
             options.Value.EnableKeyLengthValidation.ShouldBeTrue(); // Default is true
@@ -100,14 +100,14 @@
             // Arrange & Act
             var options = new RedisHybridCacheOptions
             {
-                Version = 5,
+                SchemaVersion = 5,
                 EnvironmentPrefix = "prod",
                 EnableKeyEncoding = false,
                 EnableKeyLengthValidation = false,
             };
 
             // Assert
-            options.Version.ShouldBe(5);
+            options.SchemaVersion.ShouldBe(5);
             options.EnvironmentPrefix.ShouldBe("prod");
             options.EnableKeyEncoding.ShouldBeFalse();
             options.EnableKeyLengthValidation.ShouldBeFalse();

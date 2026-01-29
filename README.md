@@ -228,13 +228,13 @@ public class MyDistributedCache : MessagePackDistributedCache<MyCacheId>
 
 #### Cache Key Versioning and Environment Isolation
 
-**Version Management:**
-The `Version` property (integer) allows you to invalidate all cached data when you need to force a cache refresh (e.g., after schema changes or bug fixes).
+**Schema Version Management:**
+The `SchemaVersion` property (integer) allows you to invalidate all cached data when you need to force a cache refresh (e.g., after schema changes or bug fixes).
 
 ```csharp
 services.AddSerializedDistributedCache(options =>
 {
-    options.Version = 2;
+    options.SchemaVersion = 2;
 });
 ```
 
@@ -303,9 +303,9 @@ services.AddSerializedDistributedCache(options =>
     // (requires decorating your classes with [MessagePackObject])
     options.RequireMessagePackObjectAnnotation = true;
     
-    // Cache key version for invalidation (default: null - not included in key)
-    // Version is formatted as "v{number}" in cache key (e.g., v1, v2)
-    options.Version = 1;
+    // Cache schema version for invalidation (default: null - not included in key)
+    // Schema version is formatted as "v{number}" in cache key (e.g., v1, v2)
+    options.SchemaVersion = 1;
     
     // Optional environment prefix for cache isolation (default: null - not included in key)
     options.EnvironmentPrefix = "prod";
@@ -327,9 +327,9 @@ services.AddRedisHybridCache("localhost:6379", options =>
     // Set to true when bandwidth is more important than CPU usage
     options.EnableCompression = false;
     
-    // Cache key version for invalidation (default: null - not included in key)
-    // Version is formatted as "v{number}" in cache key (e.g., v1, v2)
-    options.Version = 1;
+    // Cache schema version for invalidation (default: null - not included in key)
+    // Schema version is formatted as "v{number}" in cache key (e.g., v1, v2)
+    options.SchemaVersion = 1;
     
     // Optional environment prefix for cache isolation (default: null - not included in key)
     options.EnvironmentPrefix = "prod";

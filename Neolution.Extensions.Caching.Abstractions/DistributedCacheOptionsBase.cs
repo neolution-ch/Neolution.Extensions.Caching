@@ -14,16 +14,16 @@
         }
 
         /// <summary>
-        /// Gets or sets the cache key version for invalidation purposes.
-        /// If null, version is not included in the cache key.
-        /// Changing this version will invalidate all existing cache entries.
-        /// The version will be formatted as "v{number}" in the cache key (e.g., v1, v2).
-        /// Default: null (no version in cache key).
+        /// Gets or sets the cache schema version for invalidation purposes.
+        /// If null, schema version is not included in the cache key.
+        /// Changing this schema version will invalidate all existing cache entries.
+        /// The schema version will be formatted as "v{number}" in the cache key (e.g., v1, v2).
+        /// Default: null (no schema version in cache key).
         /// </summary>
         /// <example>
-        /// options.Version = 2; // Cache key becomes: "MyCacheId:v2:UserProfile"
+        /// options.SchemaVersion = 2; // Cache key becomes: "MyCacheId:v2:UserProfile"
         /// </example>
-        public int? Version { get; set; }
+        public int? SchemaVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the optional environment prefix for cache key isolation.

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `Version` property to distributed cache options for global cache invalidation.
+- `SchemaVersion` property to distributed cache options for global cache invalidation.
 - `EnvironmentPrefix` property to distributed cache options for multi-environment isolation.
 - `[CacheKey]` attribute for refactor-safe cache keys.
 - `EnableKeyEncoding` option for automatic URL encoding of optional cache keys (default: true for distributed caches).

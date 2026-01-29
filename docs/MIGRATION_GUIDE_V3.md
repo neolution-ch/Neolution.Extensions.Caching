@@ -141,19 +141,19 @@ services.AddStackExchangeRedisCache(options => { ... });
 
 ### Cache Key Versioning
 
-Invalidate all cache entries by incrementing version:
+Invalidate all cache entries by incrementing schema version:
 
 ```csharp
 services.AddSerializedDistributedCache(options =>
 {
-    options.Version = 1; // Keys: "MyCacheId:v1:UserProfile"
+    options.SchemaVersion = 1; // Keys: "MyCacheId:v1:UserProfile"
 });
 
 // Later: increment to invalidate all entries
-options.Version = 2; // Keys: "MyCacheId:v2:UserProfile"
+options.SchemaVersion = 2; // Keys: "MyCacheId:v2:UserProfile"
 ```
 
-**Default**: `null` (no version) - maintains v2.x compatibility.
+**Default**: `null` (no schema version) - maintains v2.x compatibility.
 
 ### Environment Isolation
 
@@ -189,7 +189,7 @@ public enum MyCacheId
 ### Will my existing cache entries still work?
 
 **Yes**, if you:
-- Don't set `Version` (default)
+- Don't set `SchemaVersion` (default)
 - Don't set `EnvironmentPrefix` (default)
 - Keep `EnableKeyEncoding = true` (default)
 
@@ -211,6 +211,6 @@ v3.0 improves configuration and error handling for distributed cache:
 - Fluent API support
 - Refactor-safe cache keys
 
-New features are opt-in. Existing cache entries remain compatible with default settings (no `Version`, no `EnvironmentPrefix`, `EnableKeyEncoding = true`).
+New features are opt-in. Existing cache entries remain compatible with default settings (no `SchemaVersion`, no `EnvironmentPrefix`, `EnableKeyEncoding = true`).
 
 **Need Help?** Open an issue on GitHub.
