@@ -1,7 +1,6 @@
 ﻿namespace Neolution.Extensions.Caching.UnitTests
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Neolution.Extensions.Caching.Abstractions;
@@ -108,13 +107,13 @@
             await cache.SetWithOptionsAsync(TestCacheId.NonRefreshedFoobar, cacheObject, options);
 
             // After a wait of 500ms, refresh only one of the objects.
-            Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
 
             //await cache.RefreshAsync(TestCacheId.Foobar)
 
             // After a wait of 750ms, one of the objects should now be expired because its at least 1250ms (500+750) old at the moment.
             // But the refreshed object should still be valid for roughly another 250ms.
-            Thread.Sleep(TimeSpan.FromMilliseconds(750));
+            await Task.Delay(TimeSpan.FromMilliseconds(750));
 
             // Assert
             (await cache.GetAsync<string>(TestCacheId.Foobar)).ShouldBe(cacheObject);

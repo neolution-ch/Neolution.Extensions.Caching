@@ -3,8 +3,6 @@
     using System;
     using Microsoft.Extensions.DependencyInjection;
     using Neolution.Extensions.Caching.Abstractions;
-    using Neolution.Extensions.Caching.Distributed;
-    using Neolution.Extensions.Caching.RedisHybrid;
     using Neolution.Extensions.Caching.UnitTests.Models;
     using Shouldly;
     using Xunit;

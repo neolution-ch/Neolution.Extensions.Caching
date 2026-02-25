@@ -1,7 +1,7 @@
 ﻿namespace Neolution.Extensions.Caching.UnitTests
 {
     using System;
-    using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Neolution.Extensions.Caching.Abstractions;
     using Neolution.Extensions.Caching.UnitTests.Models;
@@ -81,9 +81,10 @@
         /// Tests if removed object cannot be retrieved again from the cache.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Theory(Skip = "Refresh() is removed from interface (no strong use-case)")]
         [ClassData(typeof(ServiceCollectionTestDataCollection))]
-        public void RefreshedObjectDidNotExpire(IServiceCollection serviceCollection)
+        public async Task RefreshedObjectDidNotExpire(IServiceCollection serviceCollection)
         {
             // Assign
             using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -101,13 +102,13 @@
             cache.SetWithOptions(TestCacheId.NonRefreshedFoobar, cacheObject, options);
 
             // After a wait of 500ms, refresh only one of the objects.
-            Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
 
             //cache.Refresh(TestCacheId.Foobar)
 
             // After a wait of 750ms, one of the objects should now be expired because its at least 1250ms (500+750) old at the moment.
             // But the refreshed object should still be valid for roughly another 250ms.
-            Thread.Sleep(TimeSpan.FromMilliseconds(750));
+            await Task.Delay(TimeSpan.FromMilliseconds(750));
 
             // Assert
             cache.Get<string>(TestCacheId.Foobar).ShouldBe(cacheObject);

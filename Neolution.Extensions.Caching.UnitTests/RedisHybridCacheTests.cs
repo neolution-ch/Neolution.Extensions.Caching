@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Foundatio.Caching;
     using Foundatio.Xunit;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -10,7 +9,6 @@
     using Neolution.Extensions.Caching.RedisHybrid;
     using Neolution.Extensions.Caching.UnitTests.Models;
     using Shouldly;
-    using StackExchange.Redis;
     using Xunit;
     using Xunit.Abstractions;
 

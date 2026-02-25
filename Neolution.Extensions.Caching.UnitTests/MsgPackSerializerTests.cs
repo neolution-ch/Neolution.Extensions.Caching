@@ -2,7 +2,6 @@
 {
     using System;
     using System.IO;
-    using MessagePack;
     using Neolution.Extensions.Caching.RedisHybrid;
     using Neolution.Extensions.Caching.UnitTests.Models;
     using Shouldly;
