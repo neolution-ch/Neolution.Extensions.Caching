@@ -1,6 +1,7 @@
 ﻿namespace Neolution.Extensions.Caching.UnitTests
 {
     using System;
+    using System.Threading.Tasks;
     using Foundatio.Caching;
     using Foundatio.Xunit;
     using Microsoft.Extensions.DependencyInjection;
@@ -30,8 +31,9 @@
         /// <summary>
         /// Tests if created objects can be retrieved again from the cache.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact(Skip = "Activate as soon as we spin up a local Redis instance")]
-        public void CreatedObjectCanBeRetrievedAgain()
+        public async Task CreatedObjectCanBeRetrievedAgain()
         {
             // Assign
             var services = this.CreateServiceCollection();
@@ -45,31 +47,32 @@
             var cache = GetCache(serviceProvider);
 
             logger.LogInformation("Before Setting Foobar");
-            cache.SetAsync(TestCacheId.Foobar, cacheObject + 11).GetAwaiter().GetResult();
+            await cache.SetAsync(TestCacheId.Foobar, cacheObject + 11);
             logger.LogInformation("After Setting Foobar");
 
             logger.LogInformation("Before Getting Foobar");
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult();
+            await cache.GetAsync<string>(TestCacheId.Foobar);
             logger.LogInformation("After Getting Foobar");
 
             logger.LogInformation("Before ReSetting Foobar");
-            cache.SetAsync(TestCacheId.Foobar, cacheObject).GetAwaiter().GetResult();
+            await cache.SetAsync(TestCacheId.Foobar, cacheObject);
             logger.LogInformation("After ReSetting Foobar");
 
             logger.LogInformation("Before ReGetting Foobar");
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult();
+            await cache.GetAsync<string>(TestCacheId.Foobar);
             logger.LogInformation("After ReGetting Foobar");
 
             // Assert
             logger.LogInformation("Next value should come from Cache");
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult().ShouldBe(cacheObject);
+            (await cache.GetAsync<string>(TestCacheId.Foobar)).ShouldBe(cacheObject);
         }
 
         /// <summary>
         /// Tests if created objects can be retrieved again from the cache.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact(Skip = "Activate as soon as we spin up a local Redis instance")]
-        public void CreatedObjectWithKeyCanBeRetrievedAgain()
+        public async Task CreatedObjectWithKeyCanBeRetrievedAgain()
         {
             // Assign
             var services = this.CreateServiceCollection();
@@ -80,17 +83,18 @@
 
             // Act
             var cache = GetCache(serviceProvider);
-            cache.SetAsync(TestCacheId.Foobar, key, cacheObject).GetAwaiter().GetResult();
+            await cache.SetAsync(TestCacheId.Foobar, key, cacheObject);
 
             // Assert
-            cache.GetAsync<string>(TestCacheId.Foobar, key).GetAwaiter().GetResult().ShouldBe(cacheObject);
+            (await cache.GetAsync<string>(TestCacheId.Foobar, key)).ShouldBe(cacheObject);
         }
 
         /// <summary>
         /// Tests if removed object cannot be retrieved again from the cache.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact(Skip = "Activate as soon as we spin up a local Redis instance")]
-        public void RemovedObjectCannotBeRetrievedAgain()
+        public async Task RemovedObjectCannotBeRetrievedAgain()
         {
             // Assign
             var services = this.CreateServiceCollection();
@@ -99,11 +103,11 @@
 
             // Act
             var cache = GetCache(serviceProvider);
-            cache.SetAsync(TestCacheId.Foobar, cacheObject).GetAwaiter().GetResult();
-            cache.RemoveAsync(TestCacheId.Foobar).GetAwaiter().GetResult();
+            await cache.SetAsync(TestCacheId.Foobar, cacheObject);
+            await cache.RemoveAsync(TestCacheId.Foobar);
 
             // Assert
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult().ShouldBeNull();
+            (await cache.GetAsync<string>(TestCacheId.Foobar)).ShouldBeNull();
         }
 
         /// <summary>
@@ -123,7 +127,7 @@
         private IServiceCollection CreateServiceCollection()
         {
             var services = new ServiceCollection();
-            this.Log.MinimumLevel = LogLevel.Trace;
+            this.Log.DefaultLogLevel = LogLevel.Trace;
             services.AddSingleton<ILoggerFactory>(this.Log);
             services.AddRedisHybridCache("localhost", options =>
             {

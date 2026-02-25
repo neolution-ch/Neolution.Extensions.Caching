@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Neolution.Extensions.Caching.Abstractions;
     using Neolution.Extensions.Caching.UnitTests.Models;
@@ -18,31 +19,33 @@
         /// Tests if created objects can be retrieved again from the cache.
         /// </summary>
         /// <param name="services">The service collection.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Theory]
         [ClassData(typeof(ServiceCollectionTestDataCollection))]
-        public void CreatedObjectCanBeRetrievedAgain(IServiceCollection services)
+        public async Task CreatedObjectCanBeRetrievedAgain(IServiceCollection services)
         {
             using var serviceProvider = services.BuildServiceProvider();
             const string cacheObject = "Hello World!";
 
             // Act
             var cache = GetCache(serviceProvider);
-            cache.SetAsync(TestCacheId.Foobar, cacheObject).GetAwaiter().GetResult();
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult();
-            cache.SetAsync(TestCacheId.Foobar, cacheObject).GetAwaiter().GetResult();
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult();
+            await cache.SetAsync(TestCacheId.Foobar, cacheObject);
+            await cache.GetAsync<string>(TestCacheId.Foobar);
+            await cache.SetAsync(TestCacheId.Foobar, cacheObject);
+            await cache.GetAsync<string>(TestCacheId.Foobar);
 
             // Assert
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult().ShouldBe(cacheObject);
+            (await cache.GetAsync<string>(TestCacheId.Foobar)).ShouldBe(cacheObject);
         }
 
         /// <summary>
         /// Tests if created objects can be retrieved again from the cache.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Theory]
         [ClassData(typeof(ServiceCollectionTestDataCollection))]
-        public void CreatedObjectWithKeyCanBeRetrievedAgain(IServiceCollection serviceCollection)
+        public async Task CreatedObjectWithKeyCanBeRetrievedAgain(IServiceCollection serviceCollection)
         {
             // Assign
             using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -52,19 +55,20 @@
 
             // Act
             var cache = GetCache(serviceProvider);
-            cache.SetAsync(TestCacheId.Foobar, key, cacheObject).GetAwaiter().GetResult();
+            await cache.SetAsync(TestCacheId.Foobar, key, cacheObject);
 
             // Assert
-            cache.GetAsync<string>(TestCacheId.Foobar, key).GetAwaiter().GetResult().ShouldBe(cacheObject);
+            (await cache.GetAsync<string>(TestCacheId.Foobar, key)).ShouldBe(cacheObject);
         }
 
         /// <summary>
         /// Tests if removed object cannot be retrieved again from the cache.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Theory]
         [ClassData(typeof(ServiceCollectionTestDataCollection))]
-        public void RemovedObjectCannotBeRetrievedAgain(IServiceCollection serviceCollection)
+        public async Task RemovedObjectCannotBeRetrievedAgain(IServiceCollection serviceCollection)
         {
             // Assign
             using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -72,20 +76,21 @@
 
             // Act
             var cache = GetCache(serviceProvider);
-            cache.SetAsync(TestCacheId.Foobar, cacheObject).GetAwaiter().GetResult();
-            cache.RemoveAsync(TestCacheId.Foobar).GetAwaiter().GetResult();
+            await cache.SetAsync(TestCacheId.Foobar, cacheObject);
+            await cache.RemoveAsync(TestCacheId.Foobar);
 
             // Assert
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult().ShouldBeNull();
+            (await cache.GetAsync<string>(TestCacheId.Foobar)).ShouldBeNull();
         }
 
         /// <summary>
         /// Tests if removed object cannot be retrieved again from the cache.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Theory(Skip = "Refresh is removed from interface (no strong use-case)")]
         [ClassData(typeof(ServiceCollectionTestDataCollection))]
-        public void RefreshedObjectDidNotExpire(IServiceCollection serviceCollection)
+        public async Task RefreshedObjectDidNotExpire(IServiceCollection serviceCollection)
         {
             // Assign
             using var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -99,21 +104,21 @@
             var cache = GetCache(serviceProvider);
 
             // Add two objects to cache, both with a sliding expiration of 1000ms
-            cache.SetWithOptionsAsync(TestCacheId.Foobar, cacheObject, options).GetAwaiter().GetResult();
-            cache.SetWithOptionsAsync(TestCacheId.NonRefreshedFoobar, cacheObject, options).GetAwaiter().GetResult();
+            await cache.SetWithOptionsAsync(TestCacheId.Foobar, cacheObject, options);
+            await cache.SetWithOptionsAsync(TestCacheId.NonRefreshedFoobar, cacheObject, options);
 
             // After a wait of 500ms, refresh only one of the objects.
             Thread.Sleep(TimeSpan.FromMilliseconds(500));
 
-            //cache.RefreshAsync(TestCacheId.Foobar).GetAwaiter().GetResult()
+            //await cache.RefreshAsync(TestCacheId.Foobar)
 
             // After a wait of 750ms, one of the objects should now be expired because its at least 1250ms (500+750) old at the moment.
             // But the refreshed object should still be valid for roughly another 250ms.
             Thread.Sleep(TimeSpan.FromMilliseconds(750));
 
             // Assert
-            cache.GetAsync<string>(TestCacheId.Foobar).GetAwaiter().GetResult().ShouldBe(cacheObject);
-            cache.GetAsync<string>(TestCacheId.NonRefreshedFoobar).GetAwaiter().GetResult().ShouldBeNull();
+            (await cache.GetAsync<string>(TestCacheId.Foobar)).ShouldBe(cacheObject);
+            (await cache.GetAsync<string>(TestCacheId.NonRefreshedFoobar)).ShouldBeNull();
         }
 
         /// <summary>

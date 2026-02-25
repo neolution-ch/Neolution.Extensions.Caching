@@ -43,8 +43,8 @@
         /// <returns>The deserialized object</returns>
         public object Deserialize(Stream data, Type objectType)
         {
-            return MessagePackSerializer.Deserialize(objectType, data, this.options)
-                ?? throw new InvalidOperationException($"Deserialization returned null for type '{objectType}'.");
+            return MessagePack.MessagePackSerializer.Deserialize(objectType, data, this.options)
+                   ?? throw new InvalidOperationException($"Deserialization returned null for type '{objectType}'.");
         }
 
         /// <summary>
@@ -59,7 +59,7 @@
                 throw new ArgumentNullException(nameof(value));
             }
 
-            MessagePackSerializer.Serialize(value.GetType(), output, value, this.options);
+            MessagePack.MessagePackSerializer.Serialize(value.GetType(), output, value, this.options);
         }
     }
 }

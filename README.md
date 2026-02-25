@@ -1,10 +1,8 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Introduction
 
 A type-safe caching abstraction library for .NET that uses enum-based cache identifiers instead of magic strings.
 
 # Build and Test
-TODO: Describe and show how to build your code and run the tests. 
 
 - **Strongly-Typed Cache Keys**: Use enums instead of magic strings for cache identifiers, providing compile-time safety and IntelliSense support
 - **Multiple Implementations**:
