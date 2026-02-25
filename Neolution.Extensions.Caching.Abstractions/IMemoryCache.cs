@@ -20,7 +20,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <typeparam name="T">The type of the cached object.</typeparam>
         /// <param name="id">The cache identifier.</param>
         /// <returns>The object from cache.</returns>
-        T Get<T>(TCacheId id);
+        T? Get<T>(TCacheId id);
 
         /// <summary>
         /// Gets the item associated with this id and key if present.
@@ -29,7 +29,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <param name="id">The cache identifier.</param>
         /// <param name="key">An object identifying the requested entry.</param>
         /// <returns>The object from cache.</returns>
-        T Get<T>(TCacheId id, string key);
+        T? Get<T>(TCacheId id, string key);
 
         /// <summary>
         /// Create or overwrite an entry in the cache.

@@ -15,14 +15,14 @@
         private static string CacheIdName => typeof(TCacheId).Name;
 
         /// <inheritdoc />
-        public T Get<T>(TCacheId id)
+        public T? Get<T>(TCacheId id)
         {
             var cacheKey = CreateCacheKey(id);
             return this.GetCacheObject<T>(cacheKey);
         }
 
         /// <inheritdoc />
-        public T Get<T>(TCacheId id, string key)
+        public T? Get<T>(TCacheId id, string key)
         {
             var cacheKey = CreateCacheKey(id, key);
             return this.GetCacheObject<T>(cacheKey);
@@ -76,7 +76,7 @@
         /// <typeparam name="T">The type of the object</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The object from the cache</returns>
-        protected abstract T GetCacheObject<T>(string key);
+        protected abstract T? GetCacheObject<T>(string key);
 
         /// <summary>
         /// Sets the object in the cache.
