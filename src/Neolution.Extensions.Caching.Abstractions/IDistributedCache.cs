@@ -20,7 +20,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Gets a value with the given cache identifier.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <returns>The located value or null.</returns>
         T? Get<T>(TCacheId id)
@@ -29,7 +29,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Gets a value with the given cache identifier and key.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="key">The key.</param>
         /// <returns>The located value or null.</returns>
@@ -39,7 +39,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Gets a value with the given cache identifier.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="token">Optional. The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>
@@ -51,7 +51,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Gets a value with the given cache identifier and key.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="key">The key.</param>
         /// <param name="token">Optional. The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.</param>
@@ -64,7 +64,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Sets the value with the given cache identifier.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="value">The value to set in the cache.</param>
         void Set<T>(TCacheId id, T value)
@@ -73,7 +73,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Sets the value with the given cache identifier and key.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value to set in the cache.</param>
@@ -83,7 +83,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Sets the value with the given cache identifier.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="value">The value to set in the cache.</param>
         /// <param name="token">Optional. The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.</param>
@@ -96,7 +96,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Sets the value with the given cache identifier and key.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value to set in the cache.</param>
@@ -110,7 +110,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Sets the value with the given cache identifier.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="value">The value to set in the cache.</param>
         /// <param name="options">The cache options for the value.</param>
@@ -120,7 +120,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Sets the value with the given cache identifier and key.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value to set in the cache.</param>
@@ -131,7 +131,7 @@ namespace Neolution.Extensions.Caching.Abstractions
         /// <summary>
         /// Sets the value with the given cache identifier.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="value">The value to set in the cache.</param>
         /// <param name="options">The cache options for the value.</param>
@@ -143,9 +143,9 @@ namespace Neolution.Extensions.Caching.Abstractions
             where T : class;
 
         /// <summary>
-        /// Sets the value with the given cache identifier.
+        /// Sets the value with the given cache identifier and key.
         /// </summary>
-        /// <typeparam name="T">The type of the cache identifier.</typeparam>
+        /// <typeparam name="T">The type of the cached value.</typeparam>
         /// <param name="id">An enum value identifying the requested value.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value to set in the cache.</param>
