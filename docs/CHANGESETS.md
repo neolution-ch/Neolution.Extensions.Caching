@@ -52,9 +52,10 @@ PR merges to main
   └─ Release workflow opens/updates a "chore: version packages" PR
 
 Version Packages PR merges to main
-  └─ Release workflow runs scripts/publish.js
-      → pushes 4 git tags
-      → creates 4 GitHub Releases
+  └─ Release workflow runs `npx changeset publish`
+      → emits "New tag:" lines for each bumped package
+      → action pushes 4 git tags
+      → action creates 4 GitHub Releases
               ↓
    release: published event (×4)
               ↓
@@ -175,7 +176,7 @@ Use any unique prerelease suffix you want; the package never leaves your disk.
    - Generates/updates per-project `CHANGELOG.md` files.
    - Deletes the consumed `.changeset/*.md` files.
 3. Review the PR, then **merge it** when you want to ship.
-4. The Release workflow runs again, executes `scripts/publish.js`, the action pushes four tags and creates four GitHub Releases.
+4. The Release workflow runs again, executes `npx changeset publish`, the action parses its `New tag:` stdout lines, pushes four tags and creates four GitHub Releases.
 5. The `release: published` event fires the **NuGet Publish** workflow four times (once per Release), each packing and pushing one library to nuget.org.
 
 You can batch multiple changeset-bearing PRs before merging the Version Packages PR. All accumulated changesets fold into a single release.
@@ -304,6 +305,7 @@ If parsing fails, the workflow still emits a changeset using just the PR title. 
 | `baseBranch`                 | `main`                                                         | Comparisons run against `origin/main`                 |
 | `updateInternalDependencies` | `patch`                                                        | Internal dependency ranges update on every release    |
 | `ignore`                     | `[]`                                                           | No packages excluded                                  |
+| `privatePackages`            | `{ "version": true, "tag": true }`                             | Makes `changeset publish` emit `New tag:` lines for `"private": true` packages so the GitHub Action still pushes tags and creates Releases. This is the documented path for [non-npm packages like NuGet](https://github.com/changesets/changesets/blob/main/docs/versioning-apps.md). |
 
 ### Workflows
 
