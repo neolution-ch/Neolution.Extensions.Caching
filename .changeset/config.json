@@ -1,0 +1,21 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "neolution-ch/Neolution.Extensions.Caching" }
+  ],
+  "commit": false,
+  "fixed": [
+    [
+      "@neolution-ch/neolution.extensions.caching.abstractions",
+      "@neolution-ch/neolution.extensions.caching.distributed",
+      "@neolution-ch/neolution.extensions.caching.inmemory",
+      "@neolution-ch/neolution.extensions.caching.redishybrid"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}
