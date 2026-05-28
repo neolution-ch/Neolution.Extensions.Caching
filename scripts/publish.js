@@ -3,8 +3,8 @@
  *
  * This repo publishes NuGet packages, not npm packages. We still use
  * @changesets to manage versions and changelogs, and we still use
- * changesets/action to push git tags and create GitHub Releases — but the
- * actual artifact build/push is handled by .github/workflows/nuget-publish.yml,
+ * changesets/action to push git tags and create GitHub Releases. The actual
+ * artifact build/push is handled by .github/workflows/nuget-publish.yml,
  * which triggers on the Releases that this step creates.
  *
  * changesets/action detects "what was published" by scanning this script's
@@ -12,31 +12,29 @@
  * For each match it pushes the tag and creates the GitHub Release. See:
  * https://github.com/changesets/action/blob/main/src/run.ts
  *
- * Because the four libraries are a fixed group they always share a version.
- * We emit four "New tag:" lines if (and only if) the tag for the current
- * version does not already exist — making this script idempotent across
- * workflow re-runs.
+ * Workspace packages live under src/. We emit a "New tag:" line per package
+ * if (and only if) the tag for the current version does not already exist,
+ * making this script idempotent across workflow re-runs.
  */
 
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
-const libs = [
-  "Neolution.Extensions.Caching.Abstractions",
-  "Neolution.Extensions.Caching.Distributed",
-  "Neolution.Extensions.Caching.InMemory",
-  "Neolution.Extensions.Caching.RedisHybrid",
-];
-
 const repoRoot = path.join(__dirname, "..");
+const srcDir = path.join(repoRoot, "src");
 
-const packages = libs.map((lib) => {
-  const pkg = JSON.parse(
-    fs.readFileSync(path.join(repoRoot, lib, "package.json"), "utf8"),
-  );
-  return { name: pkg.name, version: pkg.version };
-});
+const packages = fs
+  .readdirSync(srcDir)
+  .map((dir) => path.join(srcDir, dir, "package.json"))
+  .filter((p) => fs.existsSync(p))
+  .map((p) => JSON.parse(fs.readFileSync(p, "utf8")))
+  .map((pkg) => ({ name: pkg.name, version: pkg.version }));
+
+if (packages.length === 0) {
+  console.error("ERROR: No workspace packages found under src/");
+  process.exit(1);
+}
 
 const firstTag = `${packages[0].name}@${packages[0].version}`;
 const existing = execSync(`git tag -l "${firstTag}"`, {
@@ -46,7 +44,7 @@ const existing = execSync(`git tag -l "${firstTag}"`, {
 
 if (existing) {
   console.log(
-    `Tag ${firstTag} already exists — nothing to release. Exiting cleanly.`,
+    `Tag ${firstTag} already exists. Nothing to release. Exiting cleanly.`,
   );
   process.exit(0);
 }

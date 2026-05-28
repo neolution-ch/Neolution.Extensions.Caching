@@ -25,22 +25,32 @@ jobs:
         run: |
           TAG="${{ github.event.release.tag_name }}"
           VERSION="${TAG##*@}"
-          LOWER=$(echo "$TAG" | sed 's|^@neolution-ch/||' | sed 's|@[^@]*$||')
+          NAME="${TAG%@*}"
 
-          case "$LOWER" in
-            neolution.extensions.caching.abstractions) PROJ="Neolution.Extensions.Caching.Abstractions" ;;
-            neolution.extensions.caching.distributed)  PROJ="Neolution.Extensions.Caching.Distributed"  ;;
-            neolution.extensions.caching.inmemory)     PROJ="Neolution.Extensions.Caching.InMemory"     ;;
-            neolution.extensions.caching.redishybrid)  PROJ="Neolution.Extensions.Caching.RedisHybrid"  ;;
-            *)
-              echo "Tag '$TAG' does not match a known package. Skipping."
-              echo "skip=true" >> "$GITHUB_OUTPUT"
-              exit 0
-              ;;
-          esac
+          PROJ_DIR=$(node -e "
+            const fs = require('fs');
+            const path = require('path');
+            for (const dir of fs.readdirSync('src')) {
+              const p = path.join('src', dir, 'package.json');
+              if (!fs.existsSync(p)) continue;
+              const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+              if (pkg.name === process.argv[1]) {
+                console.log(path.join('src', dir));
+                break;
+              }
+            }
+          " "$NAME")
 
+          if [ -z "$PROJ_DIR" ]; then
+            echo "Tag '$TAG' does not match a known package under src/. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PROJ_NAME=$(basename "$PROJ_DIR")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "project=$PROJ" >> "$GITHUB_OUTPUT"
+          echo "project_dir=$PROJ_DIR" >> "$GITHUB_OUTPUT"
+          echo "project_name=$PROJ_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Remove package.json files from pack input
         if: steps.map.outputs.skip != 'true'
@@ -49,12 +59,12 @@ jobs:
 
       - name: Restore
         if: steps.map.outputs.skip != 'true'
-        run: dotnet restore ${{ steps.map.outputs.project }}/${{ steps.map.outputs.project }}.csproj
+        run: dotnet restore ${{ steps.map.outputs.project_dir }}/${{ steps.map.outputs.project_name }}.csproj
 
       - name: Pack
         if: steps.map.outputs.skip != 'true'
         run: |
-          dotnet pack ${{ steps.map.outputs.project }}/${{ steps.map.outputs.project }}.csproj \
+          dotnet pack ${{ steps.map.outputs.project_dir }}/${{ steps.map.outputs.project_name }}.csproj \
             --configuration Release \
             --no-restore \
             -p:Version=${{ steps.map.outputs.version }} \

@@ -1,12 +1,7 @@
 {
   "name": "neolution.extensions.caching",
   "private": true,
-  "workspaces": [
-    "Neolution.Extensions.Caching.Abstractions",
-    "Neolution.Extensions.Caching.Distributed",
-    "Neolution.Extensions.Caching.InMemory",
-    "Neolution.Extensions.Caching.RedisHybrid"
-  ],
+  "workspaces": ["src/*"],
   "scripts": {
     "changeset": "changeset",
     "version-packages": "node scripts/sync-versions.js",

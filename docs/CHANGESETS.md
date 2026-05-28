@@ -32,12 +32,14 @@ This guide explains how versioning and releases work in `Neolution.Extensions.Ca
 
 This repository publishes four libraries to **nuget.org**, always in lockstep at the same version:
 
-| Library                                       | Workspace package name                                 |
-| --------------------------------------------- | ------------------------------------------------------ |
-| `Neolution.Extensions.Caching.Abstractions`   | `@neolution-ch/neolution.extensions.caching.abstractions` |
-| `Neolution.Extensions.Caching.Distributed`    | `@neolution-ch/neolution.extensions.caching.distributed`  |
-| `Neolution.Extensions.Caching.InMemory`       | `@neolution-ch/neolution.extensions.caching.inmemory`     |
-| `Neolution.Extensions.Caching.RedisHybrid`    | `@neolution-ch/neolution.extensions.caching.redishybrid`  |
+| Library                                       | Path                                                   | Workspace package name                                       |
+| --------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
+| `Neolution.Extensions.Caching.Abstractions`   | `src/Neolution.Extensions.Caching.Abstractions/`       | `@neolution-ch/neolution.extensions.caching.abstractions`    |
+| `Neolution.Extensions.Caching.Distributed`    | `src/Neolution.Extensions.Caching.Distributed/`        | `@neolution-ch/neolution.extensions.caching.distributed`     |
+| `Neolution.Extensions.Caching.InMemory`       | `src/Neolution.Extensions.Caching.InMemory/`           | `@neolution-ch/neolution.extensions.caching.inmemory`        |
+| `Neolution.Extensions.Caching.RedisHybrid`    | `src/Neolution.Extensions.Caching.RedisHybrid/`        | `@neolution-ch/neolution.extensions.caching.redishybrid`     |
+
+The test project lives at `tests/Neolution.Extensions.Caching.UnitTests/`. It is **not** a workspace package (`tests/` is outside the `src/*` workspace glob), so changes confined to it never require a changeset.
 
 The release flow:
 
@@ -145,7 +147,7 @@ The canonical doc covers npm-only [pkg.pr.new](https://pkg.pr.new) previews. For
 
 1. Pack the library locally:
    ```bash
-   dotnet pack Neolution.Extensions.Caching.Distributed/Neolution.Extensions.Caching.Distributed.csproj \
+   dotnet pack src/Neolution.Extensions.Caching.Distributed/Neolution.Extensions.Caching.Distributed.csproj \
      -c Release \
      -p:Version=2.2.0-local.1 \
      -o ./nupkgs
@@ -241,12 +243,10 @@ git checkout main && git pull
 node scripts/sync-versions.js
 git add . && git commit -m "Version packages"
 
-# Pack each library
-for proj in Neolution.Extensions.Caching.Abstractions \
-            Neolution.Extensions.Caching.Distributed \
-            Neolution.Extensions.Caching.InMemory \
-            Neolution.Extensions.Caching.RedisHybrid; do
-  dotnet pack "$proj/$proj.csproj" -c Release -o ./nupkgs
+# Pack each library (any directory under src/ with a .csproj)
+for dir in src/*/; do
+  proj=$(basename "$dir")
+  dotnet pack "$dir$proj.csproj" -c Release -o ./nupkgs
 done
 
 # Push to nuget.org with a maintainer's personal API key
@@ -283,7 +283,7 @@ Dependabot PRs do not include changesets, so CI would normally fail. The **Depen
 
 1. Dependabot opens a PR.
 2. `dependabot-changeset.yml` runs because `github.actor == 'dependabot[bot]'`.
-3. The workflow checks whether any **packable** `.csproj` files changed (i.e. anything outside `Neolution.Extensions.Caching.UnitTests`).
+3. The workflow checks whether any `.csproj` under `src/` changed (the test project under `tests/` is excluded automatically).
    - If yes → emits a `patch` changeset for all four fixed-group packages.
    - If no (test-only update) → emits an **empty** changeset.
 4. `scripts/generate-dependabot-changeset.js` parses the PR body for `Bumps [X] from Y to Z` / `Updated [X] from Y to Z` lines and includes a bump table in the changeset body.
@@ -343,7 +343,7 @@ npx changeset pre exit
 ### Where to find what
 
 - **Current version of the libraries** → `Directory.Build.props`'s `<Version>` (and any `package.json`).
-- **What's been released** → GitHub Releases page + each `Neolution.Extensions.Caching.*/CHANGELOG.md`.
+- **What's been released** → GitHub Releases page + each `src/Neolution.Extensions.Caching.*/CHANGELOG.md`.
 - **What's queued to ship next** → `.changeset/*.md` files. `npx changeset status --verbose` summarises.
 - **Why a tag has the form `@neolution-ch/...@version`** → changesets/action [tag-name code](https://github.com/changesets/action/blob/main/src/run.ts).
 - **Canonical org-wide release flow doc** → [neolution-ch/changeset-test/docs/CHANGESETS.md](https://github.com/neolution-ch/changeset-test/blob/main/docs/CHANGESETS.md).

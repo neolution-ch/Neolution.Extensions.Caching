@@ -44,14 +44,11 @@ jobs:
         if: steps.check-changeset.outputs.exists == 'false'
         shell: bash
         run: |
-          # Any change in a packable .csproj propagates to consumers via NuGet
+          # Any change to a packable .csproj propagates to consumers via NuGet
           # dependencies. Changes confined to the (non-packable) UnitTests
-          # project don't ship and should emit an empty changeset.
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- \
-            'Neolution.Extensions.Caching.Abstractions/**/*.csproj' \
-            'Neolution.Extensions.Caching.Distributed/**/*.csproj' \
-            'Neolution.Extensions.Caching.InMemory/**/*.csproj' \
-            'Neolution.Extensions.Caching.RedisHybrid/**/*.csproj')
+          # project under tests/ are excluded automatically and should produce
+          # an empty changeset.
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/**/*.csproj')
           if [ -n "$CHANGED" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "Packable .csproj changes detected:"

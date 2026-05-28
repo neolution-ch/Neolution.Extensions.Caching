@@ -4,15 +4,18 @@ const { execSync } = require("child_process");
 
 execSync("npx changeset version", { stdio: "inherit" });
 
-const libs = [
-  "Neolution.Extensions.Caching.Abstractions",
-  "Neolution.Extensions.Caching.Distributed",
-  "Neolution.Extensions.Caching.InMemory",
-  "Neolution.Extensions.Caching.RedisHybrid",
-];
-
 const repoRoot = path.join(__dirname, "..");
-const referencePkgJson = path.join(repoRoot, libs[0], "package.json");
+const srcDir = path.join(repoRoot, "src");
+const libs = fs
+  .readdirSync(srcDir)
+  .filter((d) => fs.existsSync(path.join(srcDir, d, "package.json")));
+
+if (libs.length === 0) {
+  console.error("ERROR: No workspace packages found under src/");
+  process.exit(1);
+}
+
+const referencePkgJson = path.join(srcDir, libs[0], "package.json");
 const version = JSON.parse(fs.readFileSync(referencePkgJson, "utf8")).version;
 
 const propsPath = path.join(repoRoot, "Directory.Build.props");
