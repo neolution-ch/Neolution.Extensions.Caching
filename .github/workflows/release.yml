@@ -43,7 +43,7 @@ jobs:
         uses: changesets/action@v1
         with:
           version: node scripts/sync-versions.js
-          publish: node scripts/publish.js
+          publish: npx changeset publish
           title: "chore: version packages"
           commit: "chore: version packages"
         env:
