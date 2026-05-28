@@ -6,19 +6,19 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E00BB836-121A-4858-8763-4A47C8855095}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		azure-pipelines.yml = azure-pipelines.yml
+		Directory.Build.props = Directory.Build.props
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.UnitTests", "Neolution.Extensions.Caching.UnitTests\Neolution.Extensions.Caching.UnitTests.csproj", "{04A35DA9-EEC3-4937-8A14-39623DA66F35}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.UnitTests", "tests\Neolution.Extensions.Caching.UnitTests\Neolution.Extensions.Caching.UnitTests.csproj", "{04A35DA9-EEC3-4937-8A14-39623DA66F35}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.Abstractions", "Neolution.Extensions.Caching.Abstractions\Neolution.Extensions.Caching.Abstractions.csproj", "{68AB5C41-FF5D-4669-8648-0F330AF73DE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.Abstractions", "src\Neolution.Extensions.Caching.Abstractions\Neolution.Extensions.Caching.Abstractions.csproj", "{68AB5C41-FF5D-4669-8648-0F330AF73DE9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.InMemory", "Neolution.Extensions.Caching.InMemory\Neolution.Extensions.Caching.InMemory.csproj", "{682B05A7-F3F3-4918-A5BB-8E6482E2C705}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.InMemory", "src\Neolution.Extensions.Caching.InMemory\Neolution.Extensions.Caching.InMemory.csproj", "{682B05A7-F3F3-4918-A5BB-8E6482E2C705}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.RedisHybrid", "Neolution.Extensions.Caching.RedisHybrid\Neolution.Extensions.Caching.RedisHybrid.csproj", "{49874974-90FA-4683-84BF-7B217D072899}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neolution.Extensions.Caching.RedisHybrid", "src\Neolution.Extensions.Caching.RedisHybrid\Neolution.Extensions.Caching.RedisHybrid.csproj", "{49874974-90FA-4683-84BF-7B217D072899}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neolution.Extensions.Caching.Distributed", "Neolution.Extensions.Caching.Distributed\Neolution.Extensions.Caching.Distributed.csproj", "{AFEFABB1-E20A-4274-8E2A-AC50123AF295}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neolution.Extensions.Caching.Distributed", "src\Neolution.Extensions.Caching.Distributed\Neolution.Extensions.Caching.Distributed.csproj", "{AFEFABB1-E20A-4274-8E2A-AC50123AF295}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - "release/**"
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CHANGSETS_BOT_APP_ID }}
+          private-key: ${{ secrets.CHANGSETS_BOT_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: node scripts/sync-versions.js
+          publish: npx changeset publish
+          title: "chore: version packages"
+          commit: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Create release branch on major version bump
+        if: steps.changesets.outputs.published == 'true' && github.ref == 'refs/heads/main'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const published = JSON.parse('${{ steps.changesets.outputs.publishedPackages }}');
+            if (!published.length) return;
+
+            const newVersion = published[0].version;
+            const newMajor = parseInt(newVersion.split('.')[0], 10);
+
+            // Only act on stable major bumps (not prereleases)
+            if (newVersion.includes('-') || newMajor < 1) return;
+
+            const prevMajor = newMajor - 1;
+            const branchName = `release/v${prevMajor}.x`;
+
+            try {
+                await github.rest.repos.getBranch({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    branch: branchName,
+                });
+                console.log(`Branch ${branchName} already exists, skipping.`);
+                return;
+            } catch (e) {
+                if (e.status !== 404) throw e;
+            }
+
+            const tags = await github.paginate(github.rest.repos.listTags, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+            });
+
+            const prevTag = tags.find(t => {
+                const match = t.name.match(/(?:^v?|@)(\d+)\.\d+\.\d+$/);
+                return match && parseInt(match[1], 10) === prevMajor;
+            });
+
+            if (!prevTag) {
+                console.log(`No tag found for v${prevMajor}, skipping branch creation.`);
+                return;
+            }
+
+            await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/heads/${branchName}`,
+                sha: prevTag.commit.sha,
+            });
+
+            console.log(`Created ${branchName} from tag ${prevTag.name} (${prevTag.commit.sha}).`);

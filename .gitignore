@@ -426,3 +426,9 @@ App_Data/
 
 # Repository rules
 # ================
+
+# Changesets internal cache
+.changeset/.cache/
+
+# Local NuGet pack output
+nupkgs/

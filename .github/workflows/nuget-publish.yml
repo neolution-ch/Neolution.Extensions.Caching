@@ -1,0 +1,80 @@
+name: NuGet Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Pack and push to nuget.org
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x"
+
+      - name: Map tag to project
+        id: map
+        shell: bash
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG##*@}"
+          NAME="${TAG%@*}"
+
+          PROJ_DIR=$(node -e "
+            const fs = require('fs');
+            const path = require('path');
+            for (const dir of fs.readdirSync('src')) {
+              const p = path.join('src', dir, 'package.json');
+              if (!fs.existsSync(p)) continue;
+              const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+              if (pkg.name === process.argv[1]) {
+                console.log(path.join('src', dir));
+                break;
+              }
+            }
+          " "$NAME")
+
+          if [ -z "$PROJ_DIR" ]; then
+            echo "Tag '$TAG' does not match a known package under src/. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PROJ_NAME=$(basename "$PROJ_DIR")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "project_dir=$PROJ_DIR" >> "$GITHUB_OUTPUT"
+          echo "project_name=$PROJ_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Remove package.json files from pack input
+        if: steps.map.outputs.skip != 'true'
+        shell: bash
+        run: find . -name package.json -not -path "./node_modules/*" -delete
+
+      - name: Restore
+        if: steps.map.outputs.skip != 'true'
+        run: dotnet restore ${{ steps.map.outputs.project_dir }}/${{ steps.map.outputs.project_name }}.csproj
+
+      - name: Pack
+        if: steps.map.outputs.skip != 'true'
+        run: |
+          dotnet pack ${{ steps.map.outputs.project_dir }}/${{ steps.map.outputs.project_name }}.csproj \
+            --configuration Release \
+            --no-restore \
+            -p:Version=${{ steps.map.outputs.version }} \
+            -p:PackageVersion=${{ steps.map.outputs.version }} \
+            -o ./nupkgs
+
+      - name: Push
+        if: steps.map.outputs.skip != 'true'
+        run: |
+          dotnet nuget push ./nupkgs/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key ${{ secrets.NUGET_API_KEY_NEOLUTION }} \
+            --skip-duplicate

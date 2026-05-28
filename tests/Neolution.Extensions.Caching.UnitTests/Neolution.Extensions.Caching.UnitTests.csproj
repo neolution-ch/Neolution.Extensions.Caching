@@ -31,9 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Neolution.Extensions.Caching.Distributed\Neolution.Extensions.Caching.Distributed.csproj" />
-    <ProjectReference Include="..\Neolution.Extensions.Caching.InMemory\Neolution.Extensions.Caching.InMemory.csproj" />
-    <ProjectReference Include="..\Neolution.Extensions.Caching.RedisHybrid\Neolution.Extensions.Caching.RedisHybrid.csproj" />
+    <ProjectReference Include="..\..\src\Neolution.Extensions.Caching.Distributed\Neolution.Extensions.Caching.Distributed.csproj" />
+    <ProjectReference Include="..\..\src\Neolution.Extensions.Caching.InMemory\Neolution.Extensions.Caching.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\Neolution.Extensions.Caching.RedisHybrid\Neolution.Extensions.Caching.RedisHybrid.csproj" />
   </ItemGroup>
 
 </Project>

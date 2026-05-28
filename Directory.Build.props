@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <Version>2.1.2</Version>
+    <Authors>Neolution</Authors>
+    <Company>Neolution AG</Company>
+    <Copyright>Copyright © Neolution AG</Copyright>
+    <PackageProjectUrl>https://github.com/neolution-ch/Neolution.Extensions.Caching</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/neolution-ch/Neolution.Extensions.Caching</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+</Project>
