@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "@neolution-ch/neolution.extensions.caching.abstractions": "2.1.2",
+    "@neolution-ch/neolution.extensions.caching.distributed": "2.1.2",
+    "@neolution-ch/neolution.extensions.caching.inmemory": "2.1.2",
+    "@neolution-ch/neolution.extensions.caching.redishybrid": "2.1.2"
+  },
+  "changesets": []
+}
