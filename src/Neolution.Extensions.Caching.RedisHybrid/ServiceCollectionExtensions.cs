@@ -5,6 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection
     using Foundatio.Caching;
     using Foundatio.Serializer;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Abstractions;
     using Microsoft.Extensions.Options;
     using Neolution.Extensions.Caching.Abstractions;
     using Neolution.Extensions.Caching.RedisHybrid;
@@ -181,7 +182,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ICacheClient>(sp => new RedisHybridCacheClient(new RedisHybridCacheClientOptions
             {
                 ConnectionMultiplexer = sp.GetRequiredService<IConnectionMultiplexer>(),
-                LoggerFactory = sp.GetService<ILoggerFactory>(),
+                LoggerFactory = sp.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance,
                 Serializer = sp.GetRequiredService<ISerializer>(),
             }));
 
