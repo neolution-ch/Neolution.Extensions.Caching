@@ -4,6 +4,12 @@ Migration guide for **Neolution.Extensions.Caching v3.0**.
 
 ## Breaking Changes
 
+### Target Frameworks: .NET Standard 2.0 → .NET 8.0 and .NET 10.0
+
+All four packages now multi-target **.NET 8.0** and **.NET 10.0**, and no longer ship a .NET Standard 2.0 build.
+
+**Impact**: Projects targeting .NET Framework, .NET Standard 2.0, or .NET 6.0/7.0 can no longer reference v3.0 and will fail to restore with `NU1202`. Your project must target .NET 8.0 or later. Stay on v2.x if you need .NET Standard 2.0.
+
 ### Options Pattern Correction
 
 Options classes now properly inherit from `DistributedCacheOptionsBase` instead of implementing `IOptions<T>`.
@@ -95,7 +101,16 @@ Prevents issues with Memcached and other backends with key length limits.
 
 ## Migration Checklist
 
-### Step 1: Update Packages
+### Step 1: Retarget to .NET 8.0 or Later
+
+v3.0 requires .NET 8.0 or later:
+
+```xml
+<TargetFramework>net8.0</TargetFramework>
+<!-- or net9.0, net10.0 -->
+```
+
+### Step 2: Update Packages
 
 ```bash
 dotnet add package Neolution.Extensions.Caching.InMemory --version 3.0.0
@@ -103,7 +118,7 @@ dotnet add package Neolution.Extensions.Caching.Distributed --version 3.0.0
 dotnet add package Neolution.Extensions.Caching.RedisHybrid --version 3.0.0
 ```
 
-### Step 2: Update Service Registration
+### Step 3: Update Service Registration
 
 Replace deprecated method name (or ignore warning):
 
@@ -115,7 +130,7 @@ services.AddMessagePackDistributedCache();
 services.AddSerializedDistributedCache();
 ```
 
-### Step 3: Verify Provider Registration Order
+### Step 4: Verify Provider Registration Order
 
 Ensure provider comes **before** wrapper:
 
@@ -129,7 +144,7 @@ services.AddSerializedDistributedCache();
 services.AddStackExchangeRedisCache(options => { ... });
 ```
 
-### Step 4: Test Your Application
+### Step 5: Test Your Application
 
 - Verify cache operations work as expected
 - Check logs for obsolete warnings
@@ -206,6 +221,7 @@ Minimal impact:
 
 v3.0 improves configuration and error handling for distributed cache:
 
+- .NET 8.0 and .NET 10.0 targets (.NET Standard 2.0 dropped)
 - Better error messages (early validation)
 - Exposed configuration properties
 - Fluent API support

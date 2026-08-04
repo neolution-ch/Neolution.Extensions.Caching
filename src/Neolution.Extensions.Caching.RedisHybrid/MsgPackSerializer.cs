@@ -52,7 +52,7 @@
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="output">The output.</param>
-        public void Serialize(object value, Stream output)
+        public void Serialize(object? value, Stream output)
         {
             if (value is null)
             {

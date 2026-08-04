@@ -12,7 +12,7 @@ A type-safe caching abstraction library for .NET that uses enum-based cache iden
 - **Consistent API**: Unified interface across all caching strategies
 - **Async Support**: Full async/await support for distributed cache operations
 - **Flexible Configuration**: Configurable expiration policies and serialization options
-- **.NET Standard 2.0**: Compatible with .NET Core, .NET 5+, and .NET Framework
+- **.NET 8.0 and .NET 10.0**: Multi-targeted; requires .NET 8.0 or later
 
 ## Installation
 
