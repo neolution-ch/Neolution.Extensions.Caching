@@ -7,5 +7,8 @@
     "@neolution-ch/neolution.extensions.caching.inmemory": "2.1.2",
     "@neolution-ch/neolution.extensions.caching.redishybrid": "2.1.2"
   },
-  "changesets": []
+  "changesets": [
+    "hot-coins-build",
+    "shy-tools-see"
+  ]
 }
