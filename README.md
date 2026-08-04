@@ -407,7 +407,8 @@ Neolution.Extensions.Caching/
 
 ### Prerequisites
 
-- .NET 8.0 SDK or later
+- .NET 10.0 SDK — required to build the `net10.0` target (it also builds the `net8.0` one)
+- .NET 8.0 runtime — required to run the `net8.0` test leg
 
 ### Build
 

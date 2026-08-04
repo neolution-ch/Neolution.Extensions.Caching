@@ -1,6 +1,7 @@
 ﻿namespace Neolution.Extensions.Caching.UnitTests
 {
     using System;
+    using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.DependencyInjection;
     using Neolution.Extensions.Caching.Abstractions;
     using Neolution.Extensions.Caching.UnitTests.Models;
@@ -87,18 +88,25 @@
         }
 
         /// <summary>
-        /// Tests if different schema versions produce different cache keys
+        /// Tests if different schema versions produce different cache keys.
+        /// Both caches deliberately share one backing store, so a key collision between the two
+        /// schema versions would be observable instead of hidden behind separate memory caches.
         /// </summary>
         [Fact]
         public void DifferentVersionsProduceDifferentKeys()
         {
-            // Arrange - Create two service providers with different schema versions
+            // Arrange - One backing store, shared by two providers with different schema versions
+            var backingServices = new ServiceCollection();
+            backingServices.AddDistributedMemoryCache();
+            using var backingProvider = backingServices.BuildServiceProvider();
+            var backingStore = backingProvider.GetRequiredService<IDistributedCache>();
+
             var servicesV1 = new ServiceCollection();
-            servicesV1.AddDistributedMemoryCache();
+            servicesV1.AddSingleton(backingStore);
             servicesV1.AddSerializedDistributedCache(options => options.SchemaVersion = 1);
 
             var servicesV2 = new ServiceCollection();
-            servicesV2.AddDistributedMemoryCache();
+            servicesV2.AddSingleton(backingStore);
             servicesV2.AddSerializedDistributedCache(options => options.SchemaVersion = 2);
 
             using var providerV1 = servicesV1.BuildServiceProvider();
@@ -110,12 +118,16 @@
             var valueV1 = "Value in V1";
             var valueV2 = "Value in V2";
 
-            // Act - Set values in both caches
+            // Act - Write only through the v1 cache
             cacheV1.Set(TestCacheId.Foobar, valueV1);
+
+            // Assert - The v2 cache must not see the v1 entry, because the key carries the schema version
+            cacheV2.Get<string>(TestCacheId.Foobar).ShouldBeNull();
+
+            // Act - Write the same cache id through the v2 cache
             cacheV2.Set(TestCacheId.Foobar, valueV2);
 
-            // Assert - Each cache should only see its own value
-            // Note: This test demonstrates isolation, but with separate providers they use separate memory caches
+            // Assert - Both entries coexist in the one store, so the keys really are different
             cacheV1.Get<string>(TestCacheId.Foobar).ShouldBe(valueV1);
             cacheV2.Get<string>(TestCacheId.Foobar).ShouldBe(valueV2);
         }
