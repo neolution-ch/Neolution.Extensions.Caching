@@ -33,6 +33,7 @@
         /// <param name="cache">The cache.</param>
         /// <param name="optionsAccessor">The options accessor.</param>
         public MessagePackDistributedCache(IDistributedCache cache, IOptions<MessagePackDistributedCacheOptions> optionsAccessor)
+            : base(optionsAccessor)
         {
             this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
 
@@ -42,6 +43,7 @@
             }
 
             var options = optionsAccessor.Value;
+
             if (options.RequireMessagePackObjectAnnotation)
             {
                 this.serializerOptions = MessagePackSerializerOptions.Standard;

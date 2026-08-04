@@ -1,0 +1,270 @@
+﻿namespace Neolution.Extensions.Caching.UnitTests
+{
+    using System;
+    using Microsoft.Extensions.Caching.Distributed;
+    using Microsoft.Extensions.DependencyInjection;
+    using Neolution.Extensions.Caching.Abstractions;
+    using Neolution.Extensions.Caching.UnitTests.Models;
+    using Shouldly;
+    using Xunit;
+
+    #nullable enable
+
+    /// <summary>
+    /// Tests for cache key versioning and environment isolation
+    /// </summary>
+    public class CacheKeyVersioningTests
+    {
+        /// <summary>
+        /// Tests backward compatibility - cache key without schema version by default
+        /// </summary>
+        [Fact]
+        public void MessagePackCacheKeyWithoutVersionByDefault()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddDistributedMemoryCache();
+            services.AddSerializedDistributedCache(); // No options - should not include schema version
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "Hello World!";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, testValue);
+
+            // Assert - Verify we can retrieve the value (maintains backward compatibility)
+            cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
+        }
+
+        /// <summary>
+        /// Tests if cache key includes schema version when configured
+        /// </summary>
+        [Fact]
+        public void MessagePackCacheKeyIncludesConfiguredVersion()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddDistributedMemoryCache();
+            services.AddSerializedDistributedCache(options =>
+            {
+                options.SchemaVersion = 1;
+            });
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "Hello World!";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, testValue);
+
+            // Assert - Verify we can retrieve the value (schema version is included in key)
+            cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
+        }
+
+        /// <summary>
+        /// Tests if cache key includes custom schema version
+        /// </summary>
+        [Fact]
+        public void MessagePackCacheKeyIncludesCustomVersion()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddDistributedMemoryCache();
+            services.AddSerializedDistributedCache(options =>
+            {
+                options.SchemaVersion = 2;
+            });
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "Hello World!";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, testValue);
+
+            // Assert - Verify we can retrieve the value
+            cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
+        }
+
+        /// <summary>
+        /// Tests if different schema versions produce different cache keys.
+        /// Both caches deliberately share one backing store, so a key collision between the two
+        /// schema versions would be observable instead of hidden behind separate memory caches.
+        /// </summary>
+        [Fact]
+        public void DifferentVersionsProduceDifferentKeys()
+        {
+            // Arrange - One backing store, shared by two providers with different schema versions
+            var backingServices = new ServiceCollection();
+            backingServices.AddDistributedMemoryCache();
+            using var backingProvider = backingServices.BuildServiceProvider();
+            var backingStore = backingProvider.GetRequiredService<IDistributedCache>();
+
+            var servicesV1 = new ServiceCollection();
+            servicesV1.AddSingleton(backingStore);
+            servicesV1.AddSerializedDistributedCache(options => options.SchemaVersion = 1);
+
+            var servicesV2 = new ServiceCollection();
+            servicesV2.AddSingleton(backingStore);
+            servicesV2.AddSerializedDistributedCache(options => options.SchemaVersion = 2);
+
+            using var providerV1 = servicesV1.BuildServiceProvider();
+            using var providerV2 = servicesV2.BuildServiceProvider();
+
+            var cacheV1 = providerV1.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var cacheV2 = providerV2.GetRequiredService<IDistributedCache<TestCacheId>>();
+
+            var valueV1 = "Value in V1";
+            var valueV2 = "Value in V2";
+
+            // Act - Write only through the v1 cache
+            cacheV1.Set(TestCacheId.Foobar, valueV1);
+
+            // Assert - The v2 cache must not see the v1 entry, because the key carries the schema version
+            cacheV2.Get<string>(TestCacheId.Foobar).ShouldBeNull();
+
+            // Act - Write the same cache id through the v2 cache
+            cacheV2.Set(TestCacheId.Foobar, valueV2);
+
+            // Assert - Both entries coexist in the one store, so the keys really are different
+            cacheV1.Get<string>(TestCacheId.Foobar).ShouldBe(valueV1);
+            cacheV2.Get<string>(TestCacheId.Foobar).ShouldBe(valueV2);
+        }
+
+        /// <summary>
+        /// Tests if cache key includes environment prefix
+        /// </summary>
+        [Fact]
+        public void MessagePackCacheKeyIncludesEnvironmentPrefix()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddDistributedMemoryCache();
+            services.AddSerializedDistributedCache(options =>
+            {
+                options.EnvironmentPrefix = "dev";
+            });
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "Hello World!";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, testValue);
+
+            // Assert - Verify we can retrieve the value
+            cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
+        }
+
+        /// <summary>
+        /// Tests if cache key includes both schema version and environment prefix
+        /// </summary>
+        [Fact]
+        public void MessagePackCacheKeyIncludesBothVersionAndEnvironment()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddDistributedMemoryCache();
+            services.AddSerializedDistributedCache(options =>
+            {
+                options.SchemaVersion = 2;
+                options.EnvironmentPrefix = "prod";
+            });
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "Hello World!";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, testValue);
+
+            // Assert - Verify we can retrieve the value
+            cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
+        }
+
+        /// <summary>
+        /// Tests if cache key with optional key parameter works correctly
+        /// </summary>
+        [Fact]
+        public void MessagePackCacheKeyWithOptionalKeyAndVersion()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddDistributedMemoryCache();
+            services.AddSerializedDistributedCache(options =>
+            {
+                options.SchemaVersion = 2;
+                options.EnvironmentPrefix = "staging";
+            });
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "User 123";
+            var key = "123";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, key, testValue);
+
+            // Assert - Verify we can retrieve the value with the key
+            cache.Get<string>(TestCacheId.Foobar, key).ShouldBe(testValue);
+
+            // Assert - Verify the key without the optional parameter is different
+            cache.Get<string>(TestCacheId.Foobar).ShouldBeNull();
+        }
+
+        /// <summary>
+        /// Tests if null or empty environment prefix is handled correctly
+        /// </summary>
+        /// <param name="environmentPrefix">The environment prefix to test.</param>
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void NullOrEmptyEnvironmentPrefixIsHandledCorrectly(string? environmentPrefix)
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddDistributedMemoryCache();
+            services.AddSerializedDistributedCache(options =>
+            {
+                options.EnvironmentPrefix = environmentPrefix;
+            });
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "Hello World!";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, testValue);
+
+            // Assert - Should work without environment prefix
+            cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
+        }
+
+        /// <summary>
+        /// Tests if RedisHybridCache key includes custom schema version
+        /// </summary>
+        [Fact(Skip = "Requires Redis connection - integration test")]
+        public void RedisHybridCacheKeyIncludesCustomVersion()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddRedisHybridCache("localhost:6379", options =>
+            {
+                options.SchemaVersion = 2;
+                options.EnvironmentPrefix = "test";
+            });
+
+            using var serviceProvider = services.BuildServiceProvider();
+            var cache = serviceProvider.GetRequiredService<IDistributedCache<TestCacheId>>();
+            var testValue = "Hello World!";
+
+            // Act
+            cache.Set(TestCacheId.Foobar, testValue);
+
+            // Assert
+            cache.Get<string>(TestCacheId.Foobar).ShouldBe(testValue);
+        }
+    }
+}

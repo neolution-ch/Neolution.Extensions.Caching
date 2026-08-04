@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Foundatio.Caching;
+    using Microsoft.Extensions.Options;
     using Neolution.Extensions.Caching.Abstractions;
 
     /// <summary>
@@ -25,9 +26,11 @@
         /// Initializes a new instance of the <see cref="RedisHybridCache{TCacheId}"/> class.
         /// </summary>
         /// <param name="cacheClient">The cache client.</param>
-        public RedisHybridCache(ICacheClient cacheClient)
+        /// <param name="optionsAccessor">The options accessor.</param>
+        public RedisHybridCache(ICacheClient cacheClient, IOptions<RedisHybridCacheOptions> optionsAccessor)
+            : base(optionsAccessor)
         {
-            this.cacheClient = cacheClient;
+            this.cacheClient = cacheClient ?? throw new ArgumentNullException(nameof(cacheClient));
         }
 
         /// <inheritdoc />

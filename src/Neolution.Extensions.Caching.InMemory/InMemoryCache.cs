@@ -26,7 +26,8 @@
         }
 
         /// <inheritdoc />
-        protected override T GetCacheObject<T>(string key)
+        protected override T? GetCacheObject<T>(string key)
+            where T : default
         {
             return this.cache.Get<T>(key);
         }

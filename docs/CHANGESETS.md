@@ -214,6 +214,12 @@ Once on `main`, every Version Packages PR bumps the beta counter. Exit with `npx
 
 Consumers on `dotnet add package Neolution.Extensions.Caching.Abstractions` keep getting the latest stable (e.g. `2.1.1`); they have to ask for the prerelease explicitly with `--prerelease` or `--version 3.0.0-beta.0`.
 
+Differences from the [regular flow](#regular-release-flow):
+
+- Changeset files are kept until `pre exit` instead of being deleted by the Version Packages PR, so the stable release gets a complete changelog.
+- `.changeset/pre.json` is CLI-owned state: it tracks which changesets have already shipped, plus an `initialVersions` anchor that keeps repeated bumps from compounding (`3.0.0-beta.0` → `beta.1`, never `4.0.0`). Never edit it by hand.
+- If every pending changeset is empty, nothing is released at all — no Version PR, no publish.
+
 ### Backporting on `release/vX.x` branches
 
 When `main` has moved on to a new major (e.g. v3) but a fix is needed for the old major (v2), use a `release/v2.x` branch. The Release workflow auto-creates `release/v(N-1).x` whenever a new major is published from `main` — see `scripts:` block in `release.yml`. For all other cases (manually creating it retroactively, when to use it, what a backport PR looks like), follow the [Backporting section of the canonical doc](https://github.com/neolution-ch/changeset-test/blob/main/docs/CHANGESETS.md#backporting--hotfixes-on-older-versions) — both `ci.yml` and `release.yml` already trigger on `release/**`.

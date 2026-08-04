@@ -1,27 +1,25 @@
 ﻿namespace Neolution.Extensions.Caching.Distributed
 {
-    using Microsoft.Extensions.Options;
+    using Neolution.Extensions.Caching.Abstractions;
 
     /// <summary>
-    /// The options for the MessagePack distributed cache implementation.
+    /// Configuration options for MessagePack distributed cache.
     /// </summary>
-    public class MessagePackDistributedCacheOptions : IOptions<MessagePackDistributedCacheOptions>
+    public class MessagePackDistributedCacheOptions : DistributedCacheOptionsBase
     {
         /// <summary>
-        /// Gets or sets a value indicating whether to disable compression, to not waste CPU resources if working with an in-memory cache backend.
+        /// Gets or sets a value indicating whether to disable compression.
+        /// Set to true to save CPU when using in-memory cache backends.
+        /// Default: false (compression enabled with LZ4).
         /// </summary>
         public bool DisableCompression { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to require <see cref="MessagePack.MessagePackObjectAttribute"/> annotation for serializable types.
-        /// Doing so would result in better overall serialization performance and smaller files.
+        /// Gets or sets a value indicating whether to require MessagePackObject attribute.
+        /// Setting this to true improves serialization performance but requires decorating
+        /// your classes with [MessagePackObject] attribute.
+        /// Default: false (uses contractless serialization).
         /// </summary>
-        /// <value>
-        ///   <c>true</c> to require <see cref="MessagePack.MessagePackObjectAttribute"/> annotation; otherwise, <c>false</c>.
-        /// </value>
         public bool RequireMessagePackObjectAnnotation { get; set; }
-
-        /// <inheritdoc />
-        public MessagePackDistributedCacheOptions Value => this;
     }
 }

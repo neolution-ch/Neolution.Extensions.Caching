@@ -10,13 +10,16 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds the Neolution default non-distributed memory caching implementation.
+        /// Adds the in-memory caching implementation.
+        /// Uses Microsoft's <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache"/> internally.
         /// </summary>
-        /// <param name="services">The services.</param>
-        public static void AddInMemoryCache(this IServiceCollection services)
+        /// <param name="services">The service collection.</param>
+        /// <returns>The service collection for fluent chaining.</returns>
+        public static IServiceCollection AddInMemoryCache(this IServiceCollection services)
         {
             services.AddMemoryCache();
             services.AddSingleton(typeof(IMemoryCache<>), typeof(InMemoryCache<>));
+            return services;
         }
     }
 }
