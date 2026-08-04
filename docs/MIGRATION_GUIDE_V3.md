@@ -10,6 +10,12 @@ All four packages now multi-target **.NET 8.0** and **.NET 10.0**, and no longer
 
 **Impact**: Projects targeting .NET Framework, .NET Standard 2.0, or .NET 6.0/7.0 can no longer reference v3.0 and will fail to restore with `NU1202`. Your project must target .NET 8.0 or later. Stay on v2.x if you need .NET Standard 2.0.
 
+### Dependency: MessagePack 2.5.x → 3.1.7
+
+v2.x referenced `MessagePack` 2.5.x directly. v3.0 gets `MessagePack` 3.1.7 transitively through `Foundatio` 13.0.2, which also clears the advisories affecting 3.1.4 (GHSA-hv8m-jj95-wg3x, GHSA-vh6j-jc39-fggf, GHSA-382j-8mxh-c7x2).
+
+**Impact**: If your project references `MessagePack` itself, NuGet resolves the whole graph to 3.x, so your own serialization code is upgraded across a major version too. Review the [MessagePack v3 release notes](https://github.com/MessagePack-CSharp/MessagePack-CSharp/releases) if you use its API directly. Projects that only consume this library's cache interfaces are unaffected.
+
 ### Options Pattern Correction
 
 Options classes now properly inherit from `DistributedCacheOptionsBase` instead of implementing `IOptions<T>`.
@@ -222,6 +228,7 @@ Minimal impact:
 v3.0 improves configuration and error handling for distributed cache:
 
 - .NET 8.0 and .NET 10.0 targets (.NET Standard 2.0 dropped)
+- `MessagePack` 3.1.7 via `Foundatio` 13.0.2, clearing three High-severity advisories
 - Better error messages (early validation)
 - Exposed configuration properties
 - Fluent API support
