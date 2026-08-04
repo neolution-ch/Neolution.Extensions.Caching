@@ -141,7 +141,7 @@
             var serializer = new MsgPackSerializer();
 
             // Act & Assert
-            Should.Throw<Exception>(() =>
+            Should.Throw<InvalidOperationException>(() =>
             {
                 using var stream = new MemoryStream(new byte[] { 0xC0 }); // MessagePack nil
                 serializer.Deserialize(stream, typeof(TestObject));

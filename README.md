@@ -246,7 +246,7 @@ services.AddSerializedDistributedCache(options =>
 });
 ```
 
-By default, neither `Version` nor `EnvironmentPrefix` are set.
+By default, neither `SchemaVersion` nor `EnvironmentPrefix` are set.
 
 ## Best Practices
 
@@ -364,7 +364,7 @@ All cache implementations support the following expiration policies:
 | **Performance** | Fastest | Depends on provider | Fast (L1 + L2 cache) |
 | **Sync Across Servers** | No | Via cache backend | Via Redis pub/sub |
 | **Async Support** | No | Yes | Yes |
-| **Provider Examples** | N/A | Redis, SQL Server, Cosmos DB, Memory | Redis only | |
+| **Provider Examples** | N/A | Redis, SQL Server, Cosmos DB, Memory | Redis only |
 
 ### When to Use Each Implementation
 
@@ -407,7 +407,7 @@ Neolution.Extensions.Caching/
 
 ### Prerequisites
 
-- .NET 6.0 SDK or later
+- .NET 8.0 SDK or later
 
 ### Build
 

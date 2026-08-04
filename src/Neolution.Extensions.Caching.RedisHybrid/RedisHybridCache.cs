@@ -31,11 +31,6 @@
             : base(optionsAccessor)
         {
             this.cacheClient = cacheClient ?? throw new ArgumentNullException(nameof(cacheClient));
-
-            if (optionsAccessor == null)
-            {
-                throw new ArgumentNullException(nameof(optionsAccessor));
-            }
         }
 
         /// <inheritdoc />
