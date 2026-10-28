@@ -1,5 +1,6 @@
 ---
 "@neolution-ch/neolution.extensions.caching.distributed": minor
+"@neolution-ch/neolution.extensions.caching.redishybrid": minor
 ---
 
 Update `Foundatio` from 13.0.2 to 13.0.5.
