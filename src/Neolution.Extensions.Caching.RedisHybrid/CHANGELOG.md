@@ -1,5 +1,19 @@
 # @neolution-ch/neolution.extensions.caching.redishybrid
 
+## 3.0.0-beta.1
+
+### Major Changes
+
+- [#15](https://github.com/neolution-ch/Neolution.Extensions.Caching/pull/15) [`51ee89f`](https://github.com/neolution-ch/Neolution.Extensions.Caching/commit/51ee89f7bf5a691f621e20e52dcc322d05b57ae4) Thanks [@neoscie](https://github.com/neoscie)! - Update `Foundatio` from 13.0.2 to 13.0.5.
+  
+  **Security:**
+  - `MessagePack` moves from 3.1.7 to 3.1.12 (via `Foundatio.MessagePack` 13.0.5), fixing GHSA-qhrr-8q5h-9q3h (Moderate)
+  
+  **Dependency changes:**
+  - `StackExchange.Redis` moves from 2.13.17 to 3.4.5 (via `Foundatio.Redis` 13.0.5) in `Neolution.Extensions.Caching.RedisHybrid`. Many members that 2.13 marks as obsolete (warning `CS0618`), such as `ConnectionMultiplexer.PreserveAsyncOrder` and the `*Slave*` members, now cause a compile error (`CS0619`). RESP3 is now the default protocol (RESP2 stays supported) and `Execute`/`ExecuteAsync` reject admin commands if `AllowAdmin` is not set. If you reference `StackExchange.Redis` 2.x directly, restore fails with `NU1605` until you raise that reference to 3.4.5 or later, or remove it
+  
+  See `docs/MIGRATION_GUIDE_V3.md` for details.
+
 ## 3.0.0-beta.0
 
 ### Major Changes

@@ -1,5 +1,9 @@
 # @neolution-ch/neolution.extensions.caching.abstractions
 
+## 3.0.0-beta.1
+
+No changes in this release.
+
 ## 3.0.0-beta.0
 
 ### Major Changes
