@@ -10,11 +10,21 @@ All four packages now multi-target **.NET 8.0** and **.NET 10.0**, and no longer
 
 **Impact**: Projects targeting .NET Framework, .NET Standard 2.0, or .NET 6.0/7.0 can no longer reference v3.0 and will fail to restore with `NU1202`. Your project must target .NET 8.0 or later. Stay on v2.x if you need .NET Standard 2.0.
 
-### Dependency: MessagePack 2.5.x → 3.1.7
+### Dependency: MessagePack 2.5.x → 3.1.12
 
-v2.x referenced `MessagePack` 2.5.x directly. v3.0 gets `MessagePack` 3.1.7 transitively through `Foundatio` 13.0.2, which also clears the advisories affecting 3.1.4 (GHSA-hv8m-jj95-wg3x, GHSA-vh6j-jc39-fggf, GHSA-382j-8mxh-c7x2).
+v2.x referenced `MessagePack` 2.5.x directly. v3.0 gets `MessagePack` 3.1.12 transitively through `Foundatio` 13.0.5, which also clears the advisories affecting 3.1.4 (GHSA-hv8m-jj95-wg3x, GHSA-vh6j-jc39-fggf, GHSA-382j-8mxh-c7x2) and 3.1.7 (GHSA-qhrr-8q5h-9q3h).
 
-**Impact**: If your project references `MessagePack` itself, NuGet resolves the whole graph to 3.x, so your own serialization code is upgraded across a major version too. Review the [MessagePack v3 release notes](https://github.com/MessagePack-CSharp/MessagePack-CSharp/releases) if you use its API directly. Projects that only consume this library's cache interfaces are unaffected.
+**Impact**: If your project references `MessagePack` 2.x directly, restore fails with `NU1605` (package downgrade). A direct reference has priority over the 3.1.12 that `Foundatio` requires. Change the reference to 3.1.12 or later, or remove it. Your own serialization code then moves across a major version too. Review the [MessagePack v3 release notes](https://github.com/MessagePack-CSharp/MessagePack-CSharp/releases) if you use its API directly. Projects that only consume this library's cache interfaces are unaffected.
+
+### Dependency: StackExchange.Redis 2.x → 3.x (RedisHybrid)
+
+`Neolution.Extensions.Caching.RedisHybrid` gets `StackExchange.Redis` 3.4.5 transitively through `Foundatio.Redis` 13.0.5. These changes can affect your own Redis code:
+
+- Many members that 2.13 marks as obsolete with a warning (`CS0618`) cause a compile error (`CS0619`) in 3.x. Examples are `ConnectionMultiplexer.PreserveAsyncOrder`, `ConnectionMultiplexer.Factory`, `ConfigurationOptions.UseSsl`, and the members with `Slave` in their names, such as `CommandFlags.PreferSlave` and `IServer.SlaveOf`.
+- RESP3 is the default protocol. RESP2 stays supported, and the client uses RESP2 if the server does not support RESP3.
+- `Execute` and `ExecuteAsync` reject admin commands if `AllowAdmin` is not set.
+
+**Impact**: If your project references `StackExchange.Redis` 2.x directly, restore fails with `NU1605` (package downgrade). Change the reference to 3.4.5 or later, or remove it. If your project gets `StackExchange.Redis` only through other packages, NuGet resolves it to 3.4.5 without a change. In both cases, your own Redis code and the `IConnectionMultiplexer` that you give to `AddRedisHybridCache` use 3.x. Before you update, remove all `CS0618` warnings that come from `StackExchange.Redis` in your project. Make sure that your own Redis code accepts RESP3, or add `protocol=resp2` to the connection string to keep RESP2. If you send admin commands through `Execute`, set `allowAdmin=true`. Review the [StackExchange.Redis v3 release notes](https://github.com/StackExchange/StackExchange.Redis/releases) for details.
 
 ### Options Pattern Correction
 
@@ -228,7 +238,8 @@ Minimal impact:
 v3.0 improves configuration and error handling for distributed cache:
 
 - .NET 8.0 and .NET 10.0 targets (.NET Standard 2.0 dropped)
-- `MessagePack` 3.1.7 via `Foundatio` 13.0.2, clearing three High-severity advisories
+- `MessagePack` 3.1.12 via `Foundatio` 13.0.5, clearing three High-severity advisories and GHSA-qhrr-8q5h-9q3h
+- `StackExchange.Redis` 3.x via `Foundatio.Redis` 13.0.5 (RESP3 by default)
 - Better error messages (early validation)
 - Exposed configuration properties
 - Fluent API support
