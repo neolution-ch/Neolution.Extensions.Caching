@@ -18,12 +18,13 @@ v2.x referenced `MessagePack` 2.5.x directly. v3.0 gets `MessagePack` 3.1.12 tra
 
 ### Dependency: StackExchange.Redis 2.x → 3.x (RedisHybrid)
 
-`Neolution.Extensions.Caching.RedisHybrid` gets `StackExchange.Redis` 3.4.5 transitively through `Foundatio.Redis` 13.0.5. The public API of `StackExchange.Redis` 3.x is the same as in 2.13. Two behaviors change:
+`Neolution.Extensions.Caching.RedisHybrid` gets `StackExchange.Redis` 3.4.5 transitively through `Foundatio.Redis` 13.0.5. These changes can affect your own Redis code:
 
+- Many members that 2.13 marks as obsolete with a warning (`CS0618`) cause a compile error (`CS0619`) in 3.x. Examples are `ConnectionMultiplexer.PreserveAsyncOrder`, `ConnectionMultiplexer.Factory`, `ConfigurationOptions.UseSsl`, and the members with `Slave` in their names, such as `CommandFlags.PreferSlave` and `IServer.SlaveOf`.
 - RESP3 is the default protocol. RESP2 stays supported, and the client uses RESP2 if the server does not support RESP3.
 - `Execute` and `ExecuteAsync` reject admin commands if `AllowAdmin` is not set.
 
-**Impact**: If your project references `StackExchange.Redis` 2.x directly, restore fails with `NU1605` (package downgrade). Change the reference to 3.4.5 or later, or remove it. If your project gets `StackExchange.Redis` only through other packages, NuGet resolves it to 3.4.5 without a change. In both cases, your own Redis code and the `IConnectionMultiplexer` that you give to `AddRedisHybridCache` use 3.x. Make sure that your own Redis code accepts RESP3, or add `protocol=resp2` to the connection string to keep RESP2. If you send admin commands through `Execute`, set `allowAdmin=true`. Review the [StackExchange.Redis v3 release notes](https://github.com/StackExchange/StackExchange.Redis/releases) for details.
+**Impact**: If your project references `StackExchange.Redis` 2.x directly, restore fails with `NU1605` (package downgrade). Change the reference to 3.4.5 or later, or remove it. If your project gets `StackExchange.Redis` only through other packages, NuGet resolves it to 3.4.5 without a change. In both cases, your own Redis code and the `IConnectionMultiplexer` that you give to `AddRedisHybridCache` use 3.x. Before you update, remove all `CS0618` warnings that come from `StackExchange.Redis` in your project. Make sure that your own Redis code accepts RESP3, or add `protocol=resp2` to the connection string to keep RESP2. If you send admin commands through `Execute`, set `allowAdmin=true`. Review the [StackExchange.Redis v3 release notes](https://github.com/StackExchange/StackExchange.Redis/releases) for details.
 
 ### Options Pattern Correction
 
