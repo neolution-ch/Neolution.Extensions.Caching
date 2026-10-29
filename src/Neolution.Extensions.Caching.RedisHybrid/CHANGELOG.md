@@ -1,5 +1,41 @@
 # @neolution-ch/neolution.extensions.caching.redishybrid
 
+## 3.0.0
+
+### Major Changes
+
+- [#15](https://github.com/neolution-ch/Neolution.Extensions.Caching/pull/15) [`51ee89f`](https://github.com/neolution-ch/Neolution.Extensions.Caching/commit/51ee89f7bf5a691f621e20e52dcc322d05b57ae4) Thanks [@neoscie](https://github.com/neoscie)! - Update `Foundatio` from 13.0.2 to 13.0.5.
+  
+  **Security:**
+  - `MessagePack` moves from 3.1.7 to 3.1.12 (via `Foundatio.MessagePack` 13.0.5), fixing GHSA-qhrr-8q5h-9q3h (Moderate)
+  
+  **Dependency changes:**
+  - `StackExchange.Redis` moves from 2.13.17 to 3.4.5 (via `Foundatio.Redis` 13.0.5) in `Neolution.Extensions.Caching.RedisHybrid`. Many members that 2.13 marks as obsolete (warning `CS0618`), such as `ConnectionMultiplexer.PreserveAsyncOrder` and the `*Slave*` members, now cause a compile error (`CS0619`). RESP3 is now the default protocol (RESP2 stays supported) and `Execute`/`ExecuteAsync` reject admin commands if `AllowAdmin` is not set. If you reference `StackExchange.Redis` 2.x directly, restore fails with `NU1605` until you raise that reference to 3.4.5 or later, or remove it
+  
+  See `docs/MIGRATION_GUIDE_V3.md` for details.
+
+- [#8](https://github.com/neolution-ch/Neolution.Extensions.Caching/pull/8) [`14ebc38`](https://github.com/neolution-ch/Neolution.Extensions.Caching/commit/14ebc387e745bc1ee6c6aa40c1945c90ad870946) Thanks [@neoscie](https://github.com/neoscie)! - Major version bump multi-targeting .NET 8 and .NET 10, with several breaking changes and new configuration options for distributed caches.
+  
+  **Breaking changes:**
+  - **.NET Standard 2.0 support dropped.** Packages now target `net8.0` and `net10.0`; projects on .NET Framework, .NET Standard 2.0 or .NET 6.0/7.0 must stay on v2.x
+  - `MessagePack` moves from 2.5.x to 3.1.12 (via `Foundatio` 13.0.5). If you reference `MessagePack` 2.x directly, restore fails with `NU1605` until you raise that reference to 3.1.12 or later, or remove it
+  - Options classes now inherit from a shared `DistributedCacheOptionsBase` instead of implementing `IOptions<T>`
+  - `AddMessagePackDistributedCache()` renamed to `AddSerializedDistributedCache()` (old method kept as `[Obsolete]`)
+  - Registration now throws immediately if no `IDistributedCache` provider is registered first
+  - Redis hybrid cache registration now takes a `RedisHybridCacheOptions` parameter instead of inline setup
+  - All extension methods now return `IServiceCollection` for fluent chaining
+  
+  **New features:**
+  - `SchemaVersion` and `EnvironmentPrefix` options for cache invalidation and multi-environment isolation
+  - `[CacheKey]` attribute on enum members for refactor-safe distributed cache keys
+  - Configurable key encoding and key length validation (both enabled by default for distributed caches)
+  - Redis hybrid cache now exposes `RedisHybridCacheOptions` with compression control and shared multiplexer support
+  
+  **Security:**
+  - `Foundatio` 13.0.5 brings `MessagePack` 3.1.12, fixing GHSA-hv8m-jj95-wg3x, GHSA-vh6j-jc39-fggf and GHSA-382j-8mxh-c7x2 (High), GHSA-qhrr-8q5h-9q3h (Moderate) plus nine lower-severity advisories that affected the 3.1.4 pinned by `Foundatio` 12.x
+  
+  See `docs/MIGRATION_GUIDE_V3.md` for the full migration walkthrough. Existing v2.x cache entries remain readable with default settings.
+
 ## 3.0.0-beta.1
 
 ### Major Changes

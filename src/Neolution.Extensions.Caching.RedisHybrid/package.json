@@ -1,5 +1,5 @@
 {
   "name": "@neolution-ch/neolution.extensions.caching.redishybrid",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0",
   "private": true
 }
