@@ -53,7 +53,7 @@ PR merges to main
 
 Version Packages PR merges to main
   └─ Release workflow runs `npx changeset publish`
-      → emits "New tag:" lines for each bumped package
+      → writes one git tag per bumped package to the CHANGESETS_OUTPUT file
       → action pushes 4 git tags
       → action creates 4 GitHub Releases
               ↓
@@ -95,7 +95,7 @@ After making your code changes, from the repo root:
 npx changeset
 ```
 
-Pick **any one** of the four libraries (the other three auto-bump to match, see [How the fixed group works](#how-the-fixed-group-works)), pick a bump type, write a one-paragraph summary. The result is a new file under `.changeset/`, e.g. `.changeset/brave-dogs-dance.md`. Commit it alongside your code change.
+Pick **each library that the change affects**, pick a bump type, write a one-paragraph summary. The four libraries always get the same version (see [How the fixed group works](#how-the-fixed-group-works)), but only the libraries that you pick get the summary in their `CHANGELOG.md`. The result is a new file under `.changeset/`, e.g. `.changeset/brave-dogs-dance.md`. Commit it alongside your code change.
 
 ### Choosing the right semver bump
 
@@ -140,7 +140,7 @@ CI re-runs and goes green.
 Add `IDistributedCache<T>.GetOrSetAsync` overload that accepts a `CancellationToken`.
 ```
 
-The YAML frontmatter declares the bump. The body is Markdown and becomes the changelog entry. Because the four packages are fixed, listing just one is enough.
+The YAML frontmatter declares the bump. The body is Markdown and becomes the changelog entry. Because the four packages are fixed, one package in the list bumps the version of all four. But Changesets writes the entry only into the `CHANGELOG.md` of each package in the list. The other packages get the new version heading with only the text "No changes in this release." Thus, list each package that the change affects.
 
 ### Locally testing a `.nupkg` before opening a PR
 
@@ -176,7 +176,7 @@ Use any unique prerelease suffix you want; the package never leaves your disk.
    - Generates/updates per-project `CHANGELOG.md` files.
    - Deletes the consumed `.changeset/*.md` files.
 3. Review the PR, then **merge it** when you want to ship.
-4. The Release workflow runs again, executes `npx changeset publish`, the action parses its `New tag:` stdout lines, pushes four tags and creates four GitHub Releases.
+4. The Release workflow runs again, executes `npx changeset publish`, the action reads the created tags from the `CHANGESETS_OUTPUT` file, pushes four tags and creates four GitHub Releases.
 5. The `release: published` event fires the **NuGet Publish** workflow four times (once per Release), each packing and pushing one library to nuget.org.
 
 You can batch multiple changeset-bearing PRs before merging the Version Packages PR. All accumulated changesets fold into a single release.
@@ -187,6 +187,7 @@ You can batch multiple changeset-bearing PRs before merging the Version Packages
 
 - All four always share the same version.
 - A changeset selecting any one of them bumps all four.
+- The changelog entry of a changeset goes only into the `CHANGELOG.md` of the packages that the changeset lists.
 - The **highest requested bump wins**: if changeset A says `patch` and changeset B says `minor`, the next release is a `minor`.
 - Every release ships all four packages, even if only one changed code-wise. This matches the existing pre-changesets convention on nuget.org (every version 2.0.0 through 2.1.1 is present for all four).
 
@@ -216,9 +217,11 @@ Consumers on `dotnet add package Neolution.Extensions.Caching.Abstractions` keep
 
 Differences from the [regular flow](#regular-release-flow):
 
-- Changeset files are kept until `pre exit` instead of being deleted by the Version Packages PR, so the stable release gets a complete changelog.
-- `.changeset/pre.json` is CLI-owned state: it tracks which changesets have already shipped, plus an `initialVersions` anchor that keeps repeated bumps from compounding (`3.0.0-beta.0` → `beta.1`, never `4.0.0`). Never edit it by hand.
+- The Version Packages PR does not delete the consumed changeset files. It moves them from `.changeset/` to `.changeset/pre/`. Each prerelease changelog thus shows only the new changesets. After `pre exit`, the next Version Packages PR uses the files in `.changeset/pre/` to write the complete changelog of the stable release, and then deletes them.
+- `.changeset/pre.json` and `.changeset/pre/` are CLI-owned state. `pre.json` holds only the mode (`pre` or `exit`) and the tag. The prerelease counter comes from the current version in the `package.json` files, so repeated bumps do not compound (`3.0.0-beta.0` → `beta.1`, never `4.0.0`). Never edit this state by hand.
 - If every pending changeset is empty, nothing is released at all — no Version PR, no publish.
+
+Changesets CLI 2 kept the shipped changesets in `.changeset/` and listed them in `pre.json`, together with an `initialVersions` anchor. CLI 3 migrates this state on disk when a command reads it, for example `npx changeset status`. Commit the migrated state before a `changeset version` run. The `version` command reads the changesets and the pre state at the same time. Thus, on a state that is not migrated, it writes the entries of the earlier prereleases into the new changelog again.
 
 ### Backporting on `release/vX.x` branches
 
@@ -311,7 +314,7 @@ If parsing fails, the workflow still emits a changeset using just the PR title. 
 | `baseBranch`                 | `main`                                                         | Comparisons run against `origin/main`                 |
 | `updateInternalDependencies` | `patch`                                                        | Internal dependency ranges update on every release    |
 | `ignore`                     | `[]`                                                           | No packages excluded                                  |
-| `privatePackages`            | `{ "version": true, "tag": true }`                             | Makes `changeset publish` emit `New tag:` lines for `"private": true` packages so the GitHub Action still pushes tags and creates Releases. This is the documented path for [non-npm packages like NuGet](https://github.com/changesets/changesets/blob/main/docs/versioning-apps.md). |
+| `privatePackages`            | `{ "version": true, "tag": true }`                             | Makes `changeset version` bump and `changeset publish` tag the `"private": true` packages, so the GitHub Action still pushes tags and creates Releases. This is the documented path for [non-npm packages like NuGet](https://github.com/changesets/changesets/blob/main/docs/versioning-apps.md). |
 
 ### Workflows
 
@@ -323,7 +326,7 @@ If parsing fails, the workflow still emits a changeset using just the PR title. 
 | `.github/workflows/nuget-publish.yml`         | `release: published`                   | `dotnet pack` + `dotnet nuget push`                       |
 | `.github/workflows/dependabot-changeset.yml`  | PR opened/synced (Dependabot only)     | Auto-generate a changeset for the PR                      |
 
-The Release workflow uses the **CSAG-Changesets-Bot** GitHub App token, not `GITHUB_TOKEN`, so Version Packages PRs trigger CI checks (GITHUB_TOKEN-pushed PRs do not).
+The Release workflow uses the **CSAG-Changesets-Bot** GitHub App token, not `GITHUB_TOKEN`, so Version Packages PRs trigger CI checks (GITHUB_TOKEN-pushed PRs do not). The workflow gives the token to the `github-token` input of `changesets/action@v2`. The action pushes the version commits and the tags through the GitHub API with this token.
 
 ### Useful commands
 
@@ -353,5 +356,5 @@ npx changeset pre exit
 - **Current version of the libraries** → `Directory.Build.props`'s `<Version>` (and any `package.json`).
 - **What's been released** → GitHub Releases page + each `src/Neolution.Extensions.Caching.*/CHANGELOG.md`.
 - **What's queued to ship next** → `.changeset/*.md` files. `npx changeset status --verbose` summarises.
-- **Why a tag has the form `@neolution-ch/...@version`** → changesets/action [tag-name code](https://github.com/changesets/action/blob/main/src/run.ts).
+- **Why a tag has the form `@neolution-ch/...@version`** → `changeset publish` creates the tags in this form and writes them to the `CHANGESETS_OUTPUT` file; changesets/action [reads that file](https://github.com/changesets/action/blob/main/src/run.ts).
 - **Canonical org-wide release flow doc** → [neolution-ch/changeset-test/docs/CHANGESETS.md](https://github.com/neolution-ch/changeset-test/blob/main/docs/CHANGESETS.md).
