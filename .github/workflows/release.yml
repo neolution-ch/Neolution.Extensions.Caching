@@ -25,32 +25,47 @@ jobs:
           private-key: ${{ secrets.CHANGESETS_BOT_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
+
+      - name: Determine publish config
+        id: publish-config
+        run: |
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            # Extract major version from branch name (e.g., release/v1.x → release-v1)
+            BRANCH="${{ github.ref_name }}"
+            TAG=$(echo "$BRANCH" | sed -n 's|release/v\([0-9]*\)\..*|release-v\1|p')
+            echo "tag=--tag $TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v2
         with:
+          # The App token must be passed through this input: the action reads only
+          # the input, and the resulting version PR and release commit are attributed
+          # to the App so that they re-trigger CI.
+          github-token: ${{ steps.app-token.outputs.token }}
           version-script: node scripts/sync-versions.js
-          publish-script: npx changeset publish
+          publish-script: npx changeset publish ${{ steps.publish-config.outputs.tag }}
           pr-title: "chore: version packages"
           commit-message: "chore: version packages"
-          github-token: ${{ steps.app-token.outputs.token }}
 
       - name: Create release branch on major version bump
         if: steps.changesets.outputs.published == 'true' && github.ref == 'refs/heads/main'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const published = JSON.parse('${{ steps.changesets.outputs.published-packages }}');

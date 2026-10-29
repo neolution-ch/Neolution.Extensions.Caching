@@ -2,7 +2,7 @@ name: Dependabot Changeset
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ jobs:
           private-key: ${{ secrets.CHANGESETS_BOT_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
@@ -29,7 +29,6 @@ jobs:
 
       - name: Check for existing changeset
         id: check-changeset
-        shell: bash
         run: |
           CHANGESET_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- '.changeset/*.md' | grep -v README.md || true)
           if [ -n "$CHANGESET_FILES" ]; then
@@ -39,38 +38,38 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Detect packable project changes
+      - name: Detect package-affecting changes
         id: detect-changes
         if: steps.check-changeset.outputs.exists == 'false'
-        shell: bash
         run: |
-          # Any change to a packable .csproj propagates to consumers via NuGet
-          # dependencies. Changes confined to the (non-packable) UnitTests
-          # project under tests/ are excluded automatically and should produce
-          # an empty changeset.
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/**/*.csproj')
+          # A shipped NuGet package is affected when its declared dependencies
+          # (a csproj or the central Directory.Packages.props) or its resolved
+          # dependency graph (packages.lock.json) change. Any Dependabot update
+          # that touches none of these (root npm dev-deps, GitHub Actions, other
+          # tooling) ships no code and gets an empty changeset instead.
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/*/*.csproj' 'src/*/packages.lock.json' 'Directory.Packages.props')
           if [ -n "$CHANGED" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Packable .csproj changes detected:"
+            echo "Package-affecting files changed:"
             echo "$CHANGED"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No packable .csproj changes detected (test-only or other internal update)"
+            echo "No package-affecting changes detected (tooling-only update)"
           fi
 
       - name: Setup Node.js
         if: steps.check-changeset.outputs.exists == 'false'
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 
       - name: Generate changeset
         if: steps.check-changeset.outputs.exists == 'false'
-        run: node scripts/generate-dependabot-changeset.js
+        run: node scripts/generate-dependabot-changeset.mjs
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
-          PACKABLE_PROJECTS_CHANGED: ${{ steps.detect-changes.outputs.changed }}
+          WORKSPACE_PACKAGES_CHANGED: ${{ steps.detect-changes.outputs.changed }}
 
       - name: Commit and push changeset
         if: steps.check-changeset.outputs.exists == 'false'
