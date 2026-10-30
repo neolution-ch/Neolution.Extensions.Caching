@@ -25,32 +25,47 @@ jobs:
           private-key: ${{ secrets.CHANGESETS_BOT_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
+
+      - name: Determine publish config
+        id: publish-config
+        run: |
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            # Extract major version from branch name (e.g., release/v1.x → release-v1)
+            BRANCH="${{ github.ref_name }}"
+            TAG=$(echo "$BRANCH" | sed -n 's|release/v\([0-9]*\)\..*|release-v\1|p')
+            echo "tag=--tag $TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v2
         with:
+          # The App token must be passed through this input: the action reads only
+          # the input, and the resulting version PR and release commit are attributed
+          # to the App so that they re-trigger CI.
+          github-token: ${{ steps.app-token.outputs.token }}
           version-script: node scripts/sync-versions.js
-          publish-script: npx changeset publish
+          publish-script: npx changeset publish ${{ steps.publish-config.outputs.tag }}
           pr-title: "chore: version packages"
           commit-message: "chore: version packages"
-          github-token: ${{ steps.app-token.outputs.token }}
 
       - name: Create release branch on major version bump
         if: steps.changesets.outputs.published == 'true' && github.ref == 'refs/heads/main'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const published = JSON.parse('${{ steps.changesets.outputs.published-packages }}');
@@ -65,6 +80,7 @@ jobs:
             const prevMajor = newMajor - 1;
             const branchName = `release/v${prevMajor}.x`;
 
+            // Check if the branch already exists
             try {
                 await github.rest.repos.getBranch({
                     owner: context.repo.owner,
@@ -77,27 +93,46 @@ jobs:
                 if (e.status !== 404) throw e;
             }
 
+            // Find the last tag for the previous major version
             const tags = await github.paginate(github.rest.repos.listTags, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 per_page: 100,
             });
 
-            const prevTag = tags.find(t => {
-                const match = t.name.match(/(?:^v?|@)(\d+)\.\d+\.\d+$/);
-                return match && parseInt(match[1], 10) === prevMajor;
-            });
+            // Newest stable release of the previous major. Only tags of the packages just
+            // published (or bare vX.Y.Z tags) count, and versions are compared numerically
+            // because the tag list API does not return tags in version order.
+            const publishedNames = new Set(published.map(p => p.name));
+            const prevTag = tags
+                .map(t => {
+                    const match = t.name.match(/^(?:(.+)@|v)?(\d+)\.(\d+)\.(\d+)$/);
+                    if (!match || (match[1] !== undefined && !publishedNames.has(match[1]))) return null;
+                    return { tag: t, version: [match[2], match[3], match[4]].map(Number) };
+                })
+                .filter(c => c && c.version[0] === prevMajor)
+                .sort((a, b) => b.version[1] - a.version[1] || b.version[2] - a.version[2])[0]?.tag;
 
             if (!prevTag) {
                 console.log(`No tag found for v${prevMajor}, skipping branch creation.`);
                 return;
             }
 
-            await github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `refs/heads/${branchName}`,
-                sha: prevTag.commit.sha,
-            });
-
-            console.log(`Created ${branchName} from tag ${prevTag.name} (${prevTag.commit.sha}).`);
+            // Create the branch from the previous major's last tag
+            try {
+                await github.rest.git.createRef({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: `refs/heads/${branchName}`,
+                    sha: prevTag.commit.sha,
+                });
+                console.log(`Created ${branchName} from tag ${prevTag.name} (${prevTag.commit.sha}).`);
+            } catch (e) {
+                // GitHub can refuse GITHUB_TOKEN when branching from an older commit (403). The
+                // release itself already succeeded, so warn with the manual command instead of failing.
+                if (e.status !== 403) throw e;
+                core.warning(
+                    `Could not create ${branchName} from ${prevTag.name}: ${e.message}. ` +
+                        `Create it by hand: git push origin ${prevTag.commit.sha}:refs/heads/${branchName}`,
+                );
+            }
