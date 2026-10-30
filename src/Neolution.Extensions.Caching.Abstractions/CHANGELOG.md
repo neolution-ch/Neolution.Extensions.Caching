@@ -24,7 +24,7 @@
   **Security:**
   - `Foundatio` 13.0.5 brings `MessagePack` 3.1.12, fixing GHSA-hv8m-jj95-wg3x, GHSA-vh6j-jc39-fggf and GHSA-382j-8mxh-c7x2 (High), GHSA-qhrr-8q5h-9q3h (Moderate) plus nine lower-severity advisories that affected the 3.1.4 pinned by `Foundatio` 12.x
   
-  See `docs/MIGRATION_GUIDE_V3.md` for the full migration walkthrough. Existing v2.x cache entries remain readable with default settings.
+  See `docs/MIGRATION_GUIDE_V3.md` for the full migration walkthrough, including the settings that keep existing v2.x cache entries readable.
 
 ## 3.0.0-beta.1
 
