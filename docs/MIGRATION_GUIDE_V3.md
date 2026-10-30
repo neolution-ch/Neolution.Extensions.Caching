@@ -113,6 +113,8 @@ services.AddSerializedDistributedCache(options =>
 
 Prevents issues with Memcached and other backends with key length limits.
 
+v2.x did not check the key length. With the default `true`, a full key of more than 250 UTF-8 bytes throws an `ArgumentException`.
+
 ---
 
 ## Migration Checklist
@@ -222,9 +224,9 @@ public enum MyCacheId
 **Yes**, if you:
 - Don't set `SchemaVersion` (default)
 - Don't set `EnvironmentPrefix` (default)
-- Keep `EnableKeyEncoding = true` (default)
+- Use only ASCII letters, digits, `-`, `_`, `.` and `~` in optional keys, or set `EnableKeyEncoding = false`
 
-Cache key format remains compatible with v2.x by default.
+With the default `EnableKeyLengthValidation = true`, a full key of more than 250 UTF-8 bytes throws an `ArgumentException`. If you use longer keys and your backend accepts them, set `EnableKeyLengthValidation = false`.
 
 ### Will this affect performance?
 
@@ -245,6 +247,6 @@ v3.0 improves configuration and error handling for distributed cache:
 - Fluent API support
 - Refactor-safe cache keys
 
-New features are opt-in. Existing cache entries remain compatible with default settings (no `SchemaVersion`, no `EnvironmentPrefix`, `EnableKeyEncoding = true`).
+New features are opt-in. For the settings that keep existing v2.x cache entries readable, see [Will my existing cache entries still work?](#will-my-existing-cache-entries-still-work).
 
 **Need Help?** Open an issue on GitHub.
